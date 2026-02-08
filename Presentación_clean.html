@@ -1,0 +1,2624 @@
+<!doctype html>
+<html lang="es">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Masterclass: Clean Architecture en KMP con Koin</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link
+      href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;700&family=JetBrains+Mono:wght@400;700&display=swap"
+      rel="stylesheet"
+    />
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css"
+    />
+    <style>
+      :root {
+        --emerald: #10b981;
+        --sky: #0ea5e9;
+        --amber: #f59e0b;
+        --rose: #f43f5e;
+        --slate-900: #0f172a;
+      }
+      body {
+        font-family: "Outfit", sans-serif;
+        background: var(--slate-900);
+        color: #f1f5f9;
+        overflow: hidden;
+      }
+      .code-font {
+        font-family: "JetBrains Mono", monospace;
+      }
+      .slide {
+        position: absolute;
+        width: 100%;
+        height: 100vh;
+        padding: 2rem 3rem 8rem 3rem;
+        display: none;
+        flex-direction: column;
+        animation: fadeIn 0.4s ease-out;
+        overflow-y: auto;
+        overflow-x: hidden;
+      }
+      .slide.active {
+        display: flex;
+      }
+      @keyframes fadeIn {
+        from {
+          opacity: 0;
+          transform: translateY(10px);
+        }
+        to {
+          opacity: 1;
+          transform: translateY(0);
+        }
+      }
+
+      .glass-card {
+        background: rgba(30, 41, 59, 0.6);
+        backdrop-filter: blur(8px);
+        border: 1px solid rgba(255, 255, 255, 0.1);
+        border-radius: 1rem;
+      }
+      .layer-badge {
+        font-size: 0.7rem;
+        font-weight: 800;
+        padding: 0.2rem 0.6rem;
+        border-radius: 4px;
+        text-transform: uppercase;
+      }
+      pre {
+        font-size: 0.85rem;
+        background: #1e293b;
+        padding: 1rem;
+        border-radius: 0.75rem;
+        border: 0.5px solid rgba(255, 255, 255, 0.05);
+      }
+
+      /* Estilos para el Menú Lateral */
+#side-menu {
+  transform: translateX(-100%);
+  transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  z-index: 100;
+  background: rgba(15, 23, 42, 0.98);
+  backdrop-filter: blur(20px);
+}
+#side-menu.open {
+  transform: translateX(0);
+}
+.menu-overlay {
+  display: none;
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.6);
+  z-index: 90;
+}
+.menu-overlay.show {
+  display: block;
+}
+
+/* Ajuste de legibilidad para bloques de código */
+pre {
+  white-space: pre-wrap !important;
+  word-break: break-word;
+}
+.wide-code {
+  width: 100%;
+  max-width: 90% !important;
+}
+
+/* ============================================ */
+/* RESPONSIVE DESIGN - MOBILE FIRST */
+/* ============================================ */
+
+/* Mobile (base styles already mobile-friendly) */
+@media (max-width: 768px) {
+  /* Reducir padding de slides en mobile */
+  .slide {
+    padding: 3rem 1rem 1.5rem 1rem;
+    overflow-y: auto;
+    overflow-x: hidden;
+  }
+  
+  /* Títulos más pequeños en mobile */
+  .slide h1 {
+    font-size: 2.5rem !important;
+    line-height: 1.2;
+  }
+  
+  .slide h2 {
+    font-size: 1.75rem !important;
+    line-height: 1.3;
+    margin-bottom: 1.5rem !important;
+  }
+  
+  .slide h3 {
+    font-size: 1.25rem !important;
+  }
+  
+  .slide h4 {
+    font-size: 1rem !important;
+  }
+  
+  /* Texto más pequeño */
+  .slide p, .slide li {
+    font-size: 0.875rem !important;
+  }
+  
+  .slide .text-xl {
+    font-size: 1rem !important;
+  }
+  
+  .slide .text-lg {
+    font-size: 0.95rem !important;
+  }
+  
+  /* Código más legible en mobile */
+  pre {
+    font-size: 0.7rem !important;
+    padding: 0.75rem !important;
+    overflow-x: auto;
+  }
+  
+  pre code {
+    font-size: 0.7rem !important;
+  }
+  
+  /* Grid a una columna en mobile */
+  .grid-cols-2,
+  .grid-cols-3,
+  .md\\:grid-cols-2,
+  .md\\:grid-cols-3 {
+    grid-template-columns: 1fr !important;
+  }
+  
+  /* Gaps más pequeños */
+  .gap-8 {
+    gap: 1rem !important;
+  }
+  
+  .gap-6 {
+    gap: 0.75rem !important;
+  }
+  
+  .gap-4 {
+    gap: 0.5rem !important;
+  }
+  
+  /* Cards más compactas */
+  .glass-card {
+    padding: 1rem !important;
+  }
+  
+  /* Menú lateral más estrecho en mobile */
+  #side-menu {
+    width: 80vw !important;
+    max-width: 280px;
+  }
+  
+  /* Botón hamburguesa más pequeño */
+  #menu-btn {
+    top: 1rem !important;
+    left: 1rem !important;
+    padding: 0.625rem !important;
+    z-index: 120 !important;
+  }
+  
+  #menu-btn i {
+    font-size: 1rem !important;
+  }
+  
+  /* Controles de navegación */
+  .fixed.bottom-10 {
+    bottom: 1.5rem !important;
+    gap: 1rem !important;
+  }
+  
+  .fixed.bottom-10 button {
+    width: 2.5rem !important;
+    height: 2.5rem !important;
+  }
+  
+  #counter {
+    font-size: 0.75rem !important;
+  }
+  
+  /* Max width containers */
+  .max-w-5xl,
+  .max-w-6xl {
+    max-width: 100% !important;
+  }
+  
+  /* Espaciado vertical */
+  .mb-10 {
+    margin-bottom: 1.5rem !important;
+  }
+  
+  .mb-8 {
+    margin-bottom: 1.25rem !important;
+  }
+  
+  .mb-6 {
+    margin-bottom: 1rem !important;
+  }
+  
+  .mt-8 {
+    margin-top: 1.5rem !important;
+  }
+  
+  .mt-6 {
+    margin-top: 1rem !important;
+  }
+  
+  /* Espaciado en listas */
+  .space-y-6 > * + * {
+    margin-top: 1rem !important;
+  }
+  
+  .space-y-4 > * + * {
+    margin-top: 0.75rem !important;
+  }
+  
+  /* Layer badges más pequeños */
+  .layer-badge {
+    font-size: 0.6rem !important;
+    padding: 0.15rem 0.4rem !important;
+  }
+  
+  /* Iconos en títulos */
+  .slide h2 i,
+  .slide h3 i {
+    font-size: 1.25rem !important;
+  }
+  
+  /* Imágenes responsive */
+  img {
+    max-width: 100% !important;
+    height: auto !important;
+  }
+  
+  /* Ocultar elementos decorativos en mobile si es necesario */
+  .hidden-mobile {
+    display: none !important;
+  }
+}
+
+/* Tablet */
+@media (min-width: 769px) and (max-width: 1024px) {
+  .slide {
+    padding: 2rem 1.5rem;
+  }
+  
+  .slide h1 {
+    font-size: 3.5rem !important;
+  }
+  
+  .slide h2 {
+    font-size: 2.5rem !important;
+  }
+  
+  pre {
+    font-size: 0.75rem !important;
+  }
+  
+  #side-menu {
+    width: 300px !important;
+  }
+}
+
+/* Landscape mobile */
+@media (max-width: 768px) and (orientation: landscape) {
+  .slide {
+    padding: 1rem 1.5rem;
+    overflow-y: auto;
+  }
+  
+  .slide h1 {
+    font-size: 2rem !important;
+  }
+  
+  .slide h2 {
+    font-size: 1.5rem !important;
+  }
+  
+  .mb-10,
+  .mb-8 {
+    margin-bottom: 1rem !important;
+  }
+}
+
+/* Fix para scroll en slides largos */
+@media (max-width: 768px) {
+  body {
+    overflow: hidden;
+  }
+  
+  .slide.active {
+    overflow-y: auto;
+    overflow-x: hidden;
+    -webkit-overflow-scrolling: touch;
+  }
+  
+  /* Padding bottom para evitar que los controles tapen contenido */
+  .slide > div {
+    padding-bottom: 5rem;
+  }
+}
+    </style>
+  </head>
+  <body>
+
+
+    <!-- Botón Hamburguesa -->
+<button id="menu-btn" class="fixed top-6 left-6 z-[110] p-3 rounded-xl bg-emerald-500 text-white shadow-lg hover:scale-110 transition-transform">
+  <i class="fas fa-bars text-xl"></i>
+</button>
+
+<!-- Capa oscura de fondo -->
+<div id="menu-overlay" class="menu-overlay"></div>
+
+<!-- Menú Lateral / Índice -->
+<aside id="side-menu" class="fixed top-0 left-0 h-full w-80 glass border-r border-white/10 p-8 overflow-y-auto">
+  <div class="mb-10 pt-10">
+    <h2 class="text-2xl font-bold text-emerald-400">Índice</h2>
+    <div class="h-1 w-12 bg-emerald-500 rounded-full mt-2"></div>
+  </div>
+
+  <nav class="space-y-8">
+
+<!-- Grupo Conceptos Fundamentales -->
+  <div>
+      <h3 class="text-xs font-bold uppercase tracking-widest text-amber-500/60 mb-3">Conceptos Fundamentales</h3>
+      <ul class="space-y-1 ml-4 border-l border-white/10 pl-4">
+        <li><button onclick="goToSlide(6)" class="text-slate-400 hover:text-amber-400 text-sm py-1 w-full text-left">Dependency Inversion</button></li>
+        <li><button onclick="goToSlide(7)" class="text-slate-400 hover:text-amber-400 text-sm py-1 w-full text-left">Regla de Dependencias</button></li>
+      </ul>
+    </div>
+
+<!-- Grupo Domain -->
+  <div>
+      <h3 class="text-xs font-bold uppercase tracking-widest text-sky-500/60 mb-3">Capa de Domain</h3>
+      <ul class="space-y-1 ml-4 border-l border-white/10 pl-4">
+        <li><button onclick="goToSlide(16)" class="text-slate-400 hover:text-sky-400 text-sm py-1 w-full text-left">Interfaces</button></li>
+        <li><button onclick="goToSlide(17)" class="text-slate-400 hover:text-sky-400 text-sm py-1 w-full text-left">Use Cases</button></li>
+        <li><button onclick="goToSlide(18)" class="text-slate-400 hover:text-sky-400 text-sm py-1 w-full text-left">¿Cuándo crear UseCases?</button></li>
+        <li><button onclick="goToSlide(19)" class="text-slate-400 hover:text-sky-400 text-sm py-1 w-full text-left">Models</button></li>
+      </ul>
+    </div>
+
+
+
+    <!-- Grupo Data -->
+    <div>
+      <h3 class="text-xs font-bold uppercase tracking-widest text-emerald-500/60 mb-3">Capa de Data</h3>
+      <ul class="space-y-1 ml-4 border-l border-white/10 pl-4">
+        <li><button onclick="goToSlide(22)" class="text-slate-400 hover:text-emerald-400 text-sm py-1 w-full text-left">Repositories</button></li>
+        <li><button onclick="goToSlide(23)" class="text-slate-400 hover:text-emerald-400 text-sm py-1 w-full text-left">DataSources</button></li>
+        <li><button onclick="goToSlide(24)" class="text-slate-400 hover:text-emerald-400 text-sm py-1 w-full text-left">DTOs & Entities</button></li>
+        <li><button onclick="goToSlide(25)" class="text-slate-400 hover:text-emerald-400 text-sm py-1 w-full text-left">Mappers</button></li>
+      </ul>
+    </div>
+
+    
+    
+
+    <!-- Grupo Presentation -->
+    <div>
+      <h3 class="text-xs font-bold uppercase tracking-widest text-rose-500/60 mb-3">Presentation</h3>
+      <ul class="space-y-1 ml-4 border-l border-white/10 pl-4">
+        <li><button onclick="goToSlide(27)" class="text-slate-400 hover:text-rose-400 text-sm py-1 w-full text-left">ViewModels</button></li>
+        <li><button onclick="goToSlide(30)" class="text-slate-400 hover:text-rose-400 text-sm py-1 w-full text-left">UI (Compose/SwiftUI)</button></li>
+      </ul>
+    </div>
+
+    <!-- Grupo DI -->
+    <div>
+      <h3 class="text-xs font-bold uppercase tracking-widest text-amber-500/60 mb-3">Inyección de Dependencias</h3>
+      <ul class="space-y-1 ml-4 border-l border-white/10 pl-4">
+        <li><button onclick="goToSlide(34)" class="text-slate-400 hover:text-amber-400 text-sm py-1 w-full text-left">Koin Modules</button></li>
+      </ul>
+    </div>
+  </nav>
+</aside>
+
+    <!-- SLIDE 1: PORTADA -->
+    <div class="slide active">
+      <div class="m-auto text-center">
+        <h1
+          class="text-7xl font-bold mb-6 bg-gradient-to-r from-emerald-400 to-sky-400 bg-clip-text text-transparent"
+        >
+          Clean Architecture en KMP
+        </h1>
+      </div>
+    </div>
+
+    <!-- SLIDE: POR QUÉ KMP + CLEAN ARCH -->
+    <div class="slide">
+      <div class="max-w-5xl m-auto w-full">
+        <h2 class="text-5xl font-bold mb-10 text-center text-emerald-400">
+          ¿Por qué KMP + Clean Architecture?
+        </h2>
+
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+          <div class="glass-card p-6 border-l-4 border-emerald-500">
+            <h4 class="font-bold mb-4 text-emerald-400">🚀 KMP te da:</h4>
+            <ul class="space-y-2 text-slate-300 text-sm">
+              <li>• Compartir lógica de negocio (Domain + Data)</li>
+              <li>• UI nativa en cada plataforma</li>
+              <li>• Un solo código para reglas de negocio</li>
+              <li>• Tests compartidos entre plataformas</li>
+            </ul>
+          </div>
+
+          <div class="glass-card p-6 border-l-4 border-sky-500">
+            <h4 class="font-bold mb-4 text-sky-400">
+              🏗️ Clean Architecture organiza:
+            </h4>
+            <ul class="space-y-2 text-slate-300 text-sm">
+              <li>• Dependencias claras en shared code</li>
+              <li>• Tests unitarios sin plataforma</li>
+              <li>• Escalabilidad multiplataforma</li>
+              <li>• Mantenimiento simplificado</li>
+            </ul>
+          </div>
+        </div>
+
+        <div
+          class="mt-8 p-4 bg-amber-500/10 border border-amber-500/20 rounded-lg"
+        >
+          <p class="text-center text-amber-400">
+            <b class="text-amber-300"
+              >KMP comparte el "qué" (lógica) + Clean Architecture organiza el
+              "cómo" (estructura)</b
+            >
+          </p>
+        </div>
+      </div>
+    </div>
+
+    <!-- SLIDE: EL PROBLEMA COMÚN -->
+    <div class="slide">
+      <div class="max-w-5xl m-auto w-full">
+        <h2 class="text-5xl font-bold mb-10 text-center text-rose-400">
+          El Problema Común en KMP
+        </h2>
+
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+          <div class="glass-card p-6 border-l-4 border-rose-500">
+            <h4 class="font-bold mb-4 text-rose-400">
+              ❌ Código KMP típico (sin Clean Arch)
+            </h4>
+            <pre
+              class="code-font text-sm text-rose-300"
+            ><code>// shared/src/commonMain/kotlin
+class ProductViewModel {
+    private val api = KtorClient() // 🚨 Acoplado a Ktor
+    
+    fun loadProducts() {
+        // 🚨 Lógica en ViewModel
+        // 🚨 No se puede testear sin KMP
+        // 🚨 Android/iOS necesitan saber detalles
+    }
+}
+
+// androidMain/iOSMain
+// ¡Duplicar lógica en cada plataforma!</code></pre>
+          </div>
+
+          <div class="glass-card p-6 border-l-4 border-emerald-500">
+            <h4 class="font-bold mb-4 text-emerald-400">
+              ✅ Con Clean Architecture + KMP
+            </h4>
+            <pre
+              class="code-font text-sm text-emerald-300"
+            ><code>// shared/src/commonMain/kotlin
+class ProductViewModel(
+    private val getProductsUseCase: GetProductsUseCase
+) {
+    fun loadProducts() {
+        // ✅ Solo coordina UI
+        // ✅ Lógica compartida 100%
+        // ✅ Testeable sin plataforma
+        getProductsUseCase()
+    }
+}
+
+// ¡Un solo código para todas las plataformas!</code></pre>
+          </div>
+        </div>
+
+        <p class="mt-8 text-center text-slate-400 italic">
+          Clean Architecture no es complicado, es organizado.
+        </p>
+      </div>
+    </div>
+
+    <!-- SLIDE: CUÁNDO USAR CLEAN -->
+    <div class="slide">
+      <div class="max-w-5xl m-auto w-full">
+        <h2 class="text-5xl font-bold mb-10 text-center text-amber-400">
+          ¿Cuándo usar (y cuándo NO) Clean Architecture?
+        </h2>
+
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-8 text-sm">
+          <div class="glass-card p-6 border-l-4 border-emerald-500">
+            <h4 class="font-bold mb-4 text-emerald-400">✅ Úsala cuando:</h4>
+            <ul class="space-y-2 text-slate-300">
+              <li>• Proyecto mediano o grande</li>
+              <li>• Más de 2 desarrolladores</li>
+              <li>• KMP / Multiplataforma</li>
+              <li>• Reglas de negocio reales</li>
+              <li>• Necesitas tests confiables</li>
+            </ul>
+          </div>
+
+          <div class="glass-card p-6 border-l-4 border-rose-500">
+            <h4 class="font-bold mb-4 text-rose-400">❌ No es ideal cuando:</h4>
+            <ul class="space-y-2 text-slate-300">
+              <li>• Apps demo o prototipos</li>
+              <li>• CRUDs muy simples</li>
+              <li>• Apps de una sola pantalla</li>
+              <li>• Time-to-market ultra corto</li>
+            </ul>
+          </div>
+        </div>
+
+        <p class="mt-6 text-center text-slate-500 italic">
+          Clean Architecture es una herramienta, no una religión.
+        </p>
+      </div>
+    </div>
+
+    
+
+    <!-- SLIDE: Clean vs MVVM -->
+    <div class="slide">
+      <div class="max-w-5xl m-auto w-full">
+        <h2 class="text-5xl font-bold mb-10 text-center">
+          MVVM vs Clean Architecture
+        </h2>
+
+        <div class="glass-card p-8 space-y-6 text-lg text-slate-300">
+          <p>
+            <b class="text-emerald-400">MVVM</b> responde a:
+            <i>¿Cómo organizo la UI?</i>
+          </p>
+          <p>
+            <b class="text-emerald-400">Clean Architecture</b> responde a:
+            <i>¿Dónde vive el negocio?</i>
+          </p>
+
+          <div class="mt-6 bg-slate-900 p-6 rounded-lg code-font text-sm">
+            Screen (Compose)<br />
+            ↓<br />
+            ViewModel (MVVM)<br />
+            ↓<br />
+            UseCase (Clean)<br />
+            ↓<br />
+            Repository (Contrato)<br />
+            ↓<br />
+            Data Source (API / DB)
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- SLIDE NUEVO 1: DEPENDENCY INVERSION PRINCIPLE -->
+    <div class="slide">
+      <div class="max-w-6xl m-auto w-full">
+        <h2 class="text-4xl font-bold mb-8 text-center text-emerald-400">
+          🎯 Dependency Inversion Principle (DIP)
+        </h2>
+
+        <p class="text-center text-lg text-slate-300 mb-8">
+          <b class="text-emerald-400">EL concepto más importante</b> de Clean Architecture
+        </p>
+
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+          <!-- SIN Clean Architecture -->
+          <div class="glass-card p-6 border-l-4 border-rose-500">
+            <h4 class="font-bold mb-4 text-rose-400 flex items-center gap-2">
+              <i class="fa-solid fa-times-circle"></i>
+              SIN Clean Architecture
+            </h4>
+            <pre class="code-font text-sm text-rose-300"><code>// ViewModel depende directamente de Data
+class ProductViewModel {
+    private val repository = ProductRepositoryImpl()
+    //                       ^^^^^^^^^^^^^^^^^^^^
+    //                       Clase concreta de Data
+    
+    fun loadProducts() {
+        viewModelScope.launch {
+            val products = repository.getProducts()
+            // ...
+        }
+    }
+}
+
+// 🚨 Problemas:
+// • ViewModel conoce detalles de implementación
+// • No se puede testear sin la DB/API real
+// • Cambiar de Ktor a Retrofit = cambiar ViewModel</code></pre>
+          </div>
+
+          <!-- CON Clean Architecture -->
+          <div class="glass-card p-6 border-l-4 border-emerald-500">
+            <h4 class="font-bold mb-4 text-emerald-400 flex items-center gap-2">
+              <i class="fa-solid fa-check-circle"></i>
+              CON Clean Architecture
+            </h4>
+            <pre class="code-font text-sm text-emerald-300"><code>// Domain (interfaz)
+interface IProductRepository {
+    suspend fun getProducts(): List&lt;Product&gt;
+}
+
+// ViewModel depende de la ABSTRACCIÓN
+class ProductViewModel(
+    private val repository: IProductRepository
+    //                     ^^^^^^^^^^^^^^^^^^^
+    //                     Interfaz de Domain
+) {
+    fun loadProducts() {
+        viewModelScope.launch {
+            val products = repository.getProducts()
+            // ...
+        }
+    }
+}
+
+// ✅ Ventajas:
+// • ViewModel no conoce si es Ktor, Room o Firebase
+// • Testeable con un mock simple
+// • Cambiar implementación = 0 cambios en ViewModel</code></pre>
+          </div>
+        </div>
+
+        <div class="mt-6 p-4 bg-amber-500/10 border border-amber-500/20 rounded-lg">
+          <p class="text-center text-amber-300 text-sm">
+            <i class="fa-solid fa-lightbulb text-amber-400"></i>
+            <b>Domain define QUÉ se necesita</b> (interfaces) → 
+            <b>Data implementa CÓMO se hace</b> (clases concretas)
+          </p>
+        </div>
+      </div>
+    </div>
+
+    <!-- SLIDE NUEVO 2: REGLA DE DEPENDENCIAS -->
+    <div class="slide">
+      <div class="max-w-6xl m-auto w-full">
+        <h2 class="text-4xl font-bold mb-8 text-center text-sky-400">
+          📋 La Regla de Dependencias
+        </h2>
+
+        <p class="text-center text-lg text-slate-300 mb-8">
+          Las flechas <b class="text-sky-400">SIEMPRE</b> apuntan hacia el núcleo (Domain)
+        </p>
+
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-8 items-start">
+          <!-- Diagrama Visual -->
+          <div class="glass-card p-8 bg-slate-900/50">
+            <h4 class="font-bold mb-6 text-center text-slate-200">
+              Flujo de Dependencias
+            </h4>
+            
+            <div class="space-y-6 code-font text-sm">
+              <!-- Presentation -->
+              <div class="flex items-center gap-4">
+                <div class="flex-1 glass-card p-4 border-l-4 border-rose-500">
+                  <div class="text-rose-400 font-bold mb-1">Presentation</div>
+                  <div class="text-xs text-slate-400">ViewModels, UI</div>
+                </div>
+                <div class="text-3xl text-emerald-400">→</div>
+              </div>
+
+              <!-- Data -->
+              <div class="flex items-center gap-4">
+                <div class="flex-1 glass-card p-4 border-l-4 border-emerald-500">
+                  <div class="text-emerald-400 font-bold mb-1">Data</div>
+                  <div class="text-xs text-slate-400">Repositories, DataSources</div>
+                </div>
+                <div class="text-3xl text-emerald-400">→</div>
+              </div>
+
+              <!-- Domain (Centro) -->
+              <div class="flex items-center justify-center">
+                <div class="glass-card p-6 border-4 border-sky-500 bg-sky-500/10 w-full">
+                  <div class="text-sky-400 font-bold text-center mb-1">DOMAIN</div>
+                  <div class="text-xs text-slate-400 text-center">Interfaces, Models, UseCases</div>
+                  <div class="text-xs text-sky-300 text-center mt-2 italic">
+                    🎯 No depende de NADIE
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <div class="mt-6 p-4 bg-emerald-500/10 border border-emerald-500/20 rounded">
+              <p class="text-xs text-emerald-300 text-center">
+                <i class="fa-solid fa-shield-alt"></i>
+                Domain es el núcleo <b>estable</b> y <b>protegido</b>
+              </p>
+            </div>
+          </div>
+
+          <!-- Qué puede importar qué -->
+          <div class="space-y-6">
+            <div class="glass-card p-6 border-l-4 border-rose-500">
+              <h4 class="font-bold mb-3 text-rose-400">
+                <span class="layer-badge bg-rose-600 text-white">PRESENTATION</span>
+              </h4>
+              <p class="text-sm text-slate-300 mb-3">Puede importar:</p>
+              <ul class="text-xs space-y-1 text-slate-400">
+                <li>✅ <code class="text-sky-400">domain.usecase.*</code></li>
+                <li>✅ <code class="text-sky-400">domain.model.*</code></li>
+                <li>✅ <code class="text-sky-400">domain.repository.*</code> (interfaces)</li>
+                <li>❌ <code class="text-rose-400">data.*</code> (NUNCA)</li>
+              </ul>
+            </div>
+
+            <div class="glass-card p-6 border-l-4 border-emerald-500">
+              <h4 class="font-bold mb-3 text-emerald-400">
+                <span class="layer-badge bg-emerald-600 text-white">DATA</span>
+              </h4>
+              <p class="text-sm text-slate-300 mb-3">Puede importar:</p>
+              <ul class="text-xs space-y-1 text-slate-400">
+                <li>✅ <code class="text-sky-400">domain.repository.*</code> (para implementar)</li>
+                <li>✅ <code class="text-sky-400">domain.model.*</code></li>
+                <li>✅ Ktor, Room, Firebase (libs externas)</li>
+                <li>❌ <code class="text-rose-400">presentation.*</code> (NUNCA)</li>
+              </ul>
+            </div>
+
+            <div class="glass-card p-6 border-l-4 border-sky-500 bg-sky-500/5">
+              <h4 class="font-bold mb-3 text-sky-400">
+                <span class="layer-badge bg-sky-600 text-white">DOMAIN</span>
+              </h4>
+              <p class="text-sm text-slate-300 mb-3">Puede importar:</p>
+              <ul class="text-xs space-y-1 text-slate-400">
+                <li>✅ Solo Kotlin estándar (List, Flow, etc.)</li>
+                <li>✅ Kotlinx.coroutines (opcional)</li>
+                <li>❌ <code class="text-rose-400">data.*</code></li>
+                <li>❌ <code class="text-rose-400">presentation.*</code></li>
+                <li>❌ <code class="text-rose-400">Ktor, Room, Compose, etc.</code></li>
+              </ul>
+            </div>
+          </div>
+        </div>
+
+        <div class="mt-6 p-4 bg-amber-500/10 border border-amber-500/20 rounded-lg">
+          <p class="text-center text-amber-300 text-sm">
+            <i class="fa-solid fa-exclamation-triangle text-amber-400"></i>
+            <b>Regla de oro:</b> Si Domain importa algo de Data o Presentation, 
+            <b class="text-rose-400">rompes Clean Architecture</b>
+          </p>
+        </div>
+      </div>
+    </div>
+
+    <!-- SLIDE 2: QUÉ ES CLEAN ARCHITECTURE -->
+    <div class="slide">
+      <div class="max-w-5xl m-auto w-full">
+        <h2 class="text-5xl font-bold mb-8 flex items-center gap-4">
+          <i class="fa-solid fa-broom text-emerald-400"></i> ¿Qué es Clean
+          Architecture?
+        </h2>
+
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-8 items-start">
+          <div class="space-y-6">
+            <p class="text-xl text-slate-300 leading-relaxed">
+              Es una filosofía de diseño que busca separar las
+              <b>reglas de negocio</b> de los <b>detalles técnicos</b>.
+            </p>
+
+            <div
+              class="glass-card p-6 border-l-4 border-amber-500 bg-slate-800/50"
+            >
+              <h4 class="font-bold text-amber-400 mb-2 flex items-center gap-2">
+                <i class="fa-solid fa-layer-group"></i> Principio de Cebolla
+              </h4>
+              <p class="text-sm text-slate-300">
+                Visualiza el software como capas concéntricas. La lógica de
+                negocio está en el núcleo y las dependencias apuntan
+                estrictamente hacia adentro.
+              </p>
+            </div>
+
+            <div class="pt-4">
+              <h4
+                class="text-xs font-semibold text-slate-500 uppercase tracking-widest mb-3"
+              >
+                Arquitecturas Similares
+              </h4>
+              <div class="flex flex-wrap gap-2">
+                <span
+                  class="px-3 py-1 bg-slate-800 border border-slate-700 rounded-full text-xs text-emerald-300"
+                  >Hexagonal (Ports & Adapters)</span
+                >
+                <span
+                  class="px-3 py-1 bg-slate-800 border border-slate-700 rounded-full text-xs text-amber-300"
+                  >Onion Architecture</span
+                >
+                <span
+                  class="px-3 py-1 bg-slate-800 border border-slate-700 rounded-full text-xs text-blue-300"
+                  >Screaming Architecture</span
+                >
+                <span
+                  class="px-3 py-1 bg-slate-800 border border-slate-700 rounded-full text-xs text-purple-300"
+                  >DCI</span
+                >
+              </div>
+            </div>
+
+            <div class="glass-card p-6 border-l-4 border-emerald-500">
+              <h4 class="font-bold text-emerald-400 mb-2">
+                Regla de Oro: Dependencias
+              </h4>
+              <p class="text-sm">
+                El Dominio (centro) no debe conocer nada de la Base de Datos o
+                la UI (afuera).
+              </p>
+            </div>
+          </div>
+
+          <div class="flex flex-col gap-6">
+            <div
+              class="rounded-xl overflow-hidden border border-slate-700 shadow-2xl bg-slate-900 p-4"
+            >
+              <img
+                src="https://blog.cleancoder.com/uncle-bob/images/2012-08-13-the-clean-architecture/CleanArchitecture.jpg"
+                alt="Clean Architecture Diagram"
+                class="w-full h-auto"
+              />
+            </div>
+
+            <div class="grid grid-cols-1 gap-4">
+              <div class="glass-card p-4 flex gap-4 items-center">
+                <i
+                  class="fa-solid fa-check-circle text-emerald-500 text-2xl"
+                ></i>
+                <div>
+                  <b class="block text-sm">Independencia de UI</b>
+                  <span class="text-[10px] text-slate-400"
+                    >Desacoplado de frameworks visuales.</span
+                  >
+                </div>
+              </div>
+              <div class="glass-card p-4 flex gap-4 items-center">
+                <i
+                  class="fa-solid fa-check-circle text-emerald-500 text-2xl"
+                ></i>
+                <div>
+                  <b class="block text-sm">Testeable</b>
+                  <span class="text-[10px] text-slate-400"
+                    >Pruebas sin infraestructura.</span
+                  >
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- SLIDE 3: ESTRUCTURA -->
+    <div class="slide">
+      <div class="max-w-6xl m-auto w-full">
+        <h2 class="text-4xl font-bold mb-10 text-center">
+          Nuestra Estructura KMP
+        </h2>
+        <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
+          <div class="glass-card p-6 border-b-4 border-sky-400">
+            <span class="layer-badge bg-sky-500/20 text-sky-400"
+              >Presentation</span
+            >
+            <ul class="text-xs mt-4 space-y-2 text-slate-400">
+              <li>• ViewModels</li>
+              <li>• Screens (Compose)</li>
+              <li>• UI State</li>
+            </ul>
+          </div>
+          <div class="glass-card p-6 border-b-4 border-emerald-400">
+            <span class="layer-badge bg-emerald-500/20 text-emerald-400"
+              >Domain</span
+            >
+            <ul class="text-xs mt-4 space-y-2 text-slate-400">
+              <li>• Models (Entities)</li>
+              <li>• Use Cases</li>
+              <li>• Repositories (Interfaces)</li>
+            </ul>
+          </div>
+          <div class="glass-card p-6 border-b-4 border-amber-400">
+            <span class="layer-badge bg-amber-500/20 text-amber-400">Data</span>
+            <ul class="text-xs mt-4 space-y-2 text-slate-400">
+              <li>• Repositories (Impl)</li>
+              <li>• Mappers</li>
+              <li>• DTOs / ApiServices</li>
+            </ul>
+          </div>
+          <div class="glass-card p-6 border-b-4 border-rose-400">
+            <span class="layer-badge bg-rose-500/20 text-rose-400">DI</span>
+            <ul class="text-xs mt-4 space-y-2 text-slate-400">
+              <li>• Koin Modules</li>
+              <li>• Inyección de piezas</li>
+            </ul>
+          </div>
+        </div>
+        <p class="mt-12 text-center text-slate-500 italic">
+          El flujo de datos: Presentation → UseCase → Repo Interface → Repo Impl
+          → API
+        </p>
+      </div>
+    </div>
+
+
+    <!-- SLIDE X: QUE NO VA EN CADA CAPA -->
+    <div class="slide">
+      <div class="max-w-6xl m-auto w-full">
+        <h2 class="text-5xl font-bold mb-10 text-center">
+          ¿Qué NO va en cada capa?
+        </h2>
+
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-6 text-sm">
+          <div class="glass-card p-6 border-b-4 border-sky-400">
+            <h4 class="font-bold mb-3 text-sky-400">Presentation</h4>
+            <ul class="space-y-2 text-slate-300">
+              <li>❌ Lógica de negocio</li>
+              <li>❌ DTOs</li>
+              <li>❌ Llamadas HTTP</li>
+            </ul>
+          </div>
+
+          <div class="glass-card p-6 border-b-4 border-emerald-400">
+            <h4 class="font-bold mb-3 text-emerald-400">Domain</h4>
+            <ul class="space-y-2 text-slate-300">
+              <li>❌ Retrofit / Ktor</li>
+              <li>❌ Room / SQL</li>
+              <li>❌ Android / iOS</li>
+            </ul>
+          </div>
+
+          <div class="glass-card p-6 border-b-4 border-amber-400">
+            <h4 class="font-bold mb-3 text-amber-400">Data</h4>
+            <ul class="space-y-2 text-slate-300">
+              <li>❌ Estados de UI</li>
+              <li>❌ Compose</li>
+              <li>❌ ViewModels</li>
+            </ul>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- SLIDE X: FLUJO COMPLETO DE UNA PANTALLA -->
+    <div class="slide">
+      <div class="max-w-5xl m-auto w-full">
+        <h2 class="text-5xl font-bold mb-10 text-center">
+          ¿Qué pasa cuando el usuario abre una pantalla?
+        </h2>
+
+        <div class="glass-card p-8 space-y-6">
+          <ol class="space-y-4 text-lg text-slate-300">
+            <li>① La UI se muestra (Compose).</li>
+            <li>② El ViewModel pide datos.</li>
+            <li>
+              ③ El ViewModel llama a un
+              <b class="text-emerald-400">Use Case</b>.
+            </li>
+            <li>
+              ④ El Use Case usa un
+              <b class="text-emerald-400">Repository</b> (contrato).
+            </li>
+            <li>⑤ El Repository obtiene datos (API / DB).</li>
+            <li>
+              ⑥ Los datos se limpian con <b class="text-amber-400">Mappers</b>.
+            </li>
+            <li>⑦ El dominio recibe modelos puros.</li>
+            <li>⑧ La UI se actualiza.</li>
+          </ol>
+        </div>
+
+        <p class="mt-6 text-center text-slate-500 italic">
+          Ninguna capa rompe las reglas. Todo fluye hacia adentro.
+        </p>
+      </div>
+    </div>
+
+    <!-- SLIDE: ERRORES COMUNES -->
+    <div class="slide">
+      <div class="max-w-5xl m-auto w-full">
+        <h2 class="text-5xl font-bold mb-10 text-center text-rose-400">
+          Errores Comunes (y cómo evitarlos)
+        </h2>
+
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+          <div class="glass-card p-6 border-l-4 border-rose-500">
+            <h4 class="font-bold mb-3 text-rose-400">
+              ❌ Error #1: Lógica en ViewModel
+            </h4>
+            <pre
+              class="code-font text-xs text-rose-200 mb-3"
+            ><code>// MAL: ViewModel con reglas de negocio
+viewModelScope.launch {
+    val products = api.getProducts()
+    val filtered = products.filter { it.price > 100 }
+    val sorted = filtered.sortedBy { it.name }
+    _uiState.value = sorted
+}</code></pre>
+            <p class="text-xs text-slate-400">
+              <b class="text-emerald-400">✅ Solución:</b> Mueve la lógica a un
+              UseCase
+            </p>
+          </div>
+
+          <div class="glass-card p-6 border-l-4 border-rose-500">
+            <h4 class="font-bold mb-3 text-rose-400">
+              ❌ Error #2: Ignorar Mappers
+            </h4>
+            <pre
+              class="code-font text-xs text-rose-200 mb-3"
+            ><code>// MAL: Usar DTOs directamente en la UI
+data class ProductDto(
+    val id: String?, // Puede ser null
+    val product_name: String // Nombre diferente
+)</code></pre>
+            <p class="text-xs text-slate-400">
+              <b class="text-emerald-400">✅ Solución:</b> Siempre mapea a
+              modelos de dominio
+            </p>
+          </div>
+
+          <div class="glass-card p-6 border-l-4 border-rose-500">
+            <h4 class="font-bold mb-3 text-rose-400">
+              ❌ Error #3: Repository con implementación
+            </h4>
+            <pre
+              class="code-font text-xs text-rose-200 mb-3"
+            ><code>// MAL: Repository en Data layer
+class ProductRepository(private val api: ProductApi) {
+    suspend fun getProducts() = api.getProducts()
+}</code></pre>
+            <p class="text-xs text-slate-400">
+              <b class="text-emerald-400">✅ Solución:</b> Interface en Domain,
+              impl en Data
+            </p>
+          </div>
+
+          <div class="glass-card p-6 border-l-4 border-rose-500">
+            <h4 class="font-bold mb-3 text-rose-400">
+              ❌ Error #4: UseCases con múltiples responsabilidades
+            </h4>
+            <pre
+              class="code-font text-xs text-rose-200 mb-3"
+            ><code>// MAL: UseCase que hace todo
+class ProductUseCase {
+    suspend fun getProducts() { ... }
+    suspend fun saveFavorite() { ... }
+    suspend fun deleteProduct() { ... }
+}</code></pre>
+            <p class="text-xs text-slate-400">
+              <b class="text-emerald-400">✅ Solución:</b> Un UseCase = Una
+              responsabilidad
+            </p>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- SLIDE: CHECKLIST PRACTICO -->
+    <div class="slide">
+      <div class="max-w-5xl m-auto w-full">
+        <h2 class="text-5xl font-bold mb-10 text-center text-emerald-400">
+          Checklist Práctico
+        </h2>
+
+        <div class="glass-card p-8">
+          <div class="space-y-4">
+            <div class="flex items-center gap-4">
+              <div
+                class="w-8 h-8 rounded-full bg-emerald-500 flex items-center justify-center"
+              >
+                <i class="fa-solid fa-check text-white text-sm"></i>
+              </div>
+              <div>
+                <b class="text-emerald-400"
+                  >Mi UseCase tiene UNA sola responsabilidad</b
+                >
+                <p class="text-xs text-slate-400 mt-1">
+                  Si hace más de una cosa, divídelo
+                </p>
+              </div>
+            </div>
+
+            <div class="flex items-center gap-4">
+              <div
+                class="w-8 h-8 rounded-full bg-emerald-500 flex items-center justify-center"
+              >
+                <i class="fa-solid fa-check text-white text-sm"></i>
+              </div>
+              <div>
+                <b class="text-emerald-400"
+                  >Mi Repository es una INTERFACE en Domain</b
+                >
+                <p class="text-xs text-slate-400 mt-1">
+                  La implementación vive en Data layer
+                </p>
+              </div>
+            </div>
+
+            <div class="flex items-center gap-4">
+              <div
+                class="w-8 h-8 rounded-full bg-emerald-500 flex items-center justify-center"
+              >
+                <i class="fa-solid fa-check text-white text-sm"></i>
+              </div>
+              <div>
+                <b class="text-emerald-400"
+                  >Mi Data layer NO conoce ViewModels</b
+                >
+                <p class="text-xs text-slate-400 mt-1">
+                  Nunca importes presentation en data
+                </p>
+              </div>
+            </div>
+
+            <div class="flex items-center gap-4">
+              <div
+                class="w-8 h-8 rounded-full bg-emerald-500 flex items-center justify-center"
+              >
+                <i class="fa-solid fa-check text-white text-sm"></i>
+              </div>
+              <div>
+                <b class="text-emerald-400"
+                  >Puedo testear mi lógica sin Android</b
+                >
+                <p class="text-xs text-slate-400 mt-1">
+                  Si necesitas Android, algo está mal
+                </p>
+              </div>
+            </div>
+
+            <div class="flex items-center gap-4">
+              <div
+                class="w-8 h-8 rounded-full bg-emerald-500 flex items-center justify-center"
+              >
+                <i class="fa-solid fa-check text-white text-sm"></i>
+              </div>
+              <div>
+                <b class="text-emerald-400">Mis DTOs se convierten a Models</b>
+                <p class="text-xs text-slate-400 mt-1">
+                  Nunca uses DTOs directamente en el dominio
+                </p>
+              </div>
+            </div>
+          </div>
+
+          <div
+            class="mt-8 p-4 bg-amber-500/10 border border-amber-500/20 rounded-lg"
+          >
+            <p class="text-center text-amber-400 font-bold">
+              🎯 Si pasas este checklist, tu arquitectura está en buen camino
+            </p>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- SLIDE X: SIN CLEAN ARCH -->
+    <div class="slide">
+      <div class="max-w-5xl m-auto w-full">
+        <h2 class="text-5xl font-bold mb-8 text-rose-400 text-center">
+          ¿Qué pasa si NO usamos Clean Architecture?
+        </h2>
+
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+          <div class="glass-card p-6 border-l-4 border-rose-500">
+            <h4 class="font-bold mb-4 text-rose-400">Problemas comunes</h4>
+            <ul class="space-y-3 text-sm text-slate-300">
+              <li>❌ UI llamando directamente a la API</li>
+              <li>❌ ViewModels con lógica de negocio</li>
+              <li>❌ DTOs usados en la UI</li>
+              <li>❌ Cambios pequeños rompen todo</li>
+              <li>❌ Tests difíciles o imposibles</li>
+            </ul>
+          </div>
+
+          <div class="glass-card p-6 border-l-4 border-emerald-500">
+            <h4 class="font-bold mb-4 text-emerald-400">
+              Con Clean Architecture
+            </h4>
+            <ul class="space-y-3 text-sm text-slate-300">
+              <li>✅ Cambios aislados por capa</li>
+              <li>✅ Dominio independiente</li>
+              <li>✅ Código testeable</li>
+              <li>✅ Escalabilidad real</li>
+              <li>✅ Menos bugs en producción</li>
+            </ul>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- SLIDE X: PORTADA DOMAIN -->
+    <div class="slide">
+      <div class="m-auto text-center">
+        <h1
+          class="text-7xl font-bold mb-6 bg-gradient-to-r from-emerald-400 to-sky-400 bg-clip-text text-transparent"
+        >
+          DOMAIN
+        </h1>
+        <p class="text-2xl text-slate-400 max-w-3xl mx-auto">
+          Capa donde se encuentra la lógica de negocio
+        </p>
+        <div class="mt-12 flex gap-4 justify-center">
+          <div class="px-6 py-3 glass-card flex items-center gap-3">
+            <i class="fa-solid fa-database text-emerald-400"></i>
+            <span>Model</span>
+          </div>
+          <div class="px-6 py-3 glass-card flex items-center gap-3">
+            <i class="fa-solid fa-vial text-sky-400"></i>
+            <span>UseCase</span>
+          </div>
+
+          <div class="px-6 py-3 glass-card flex items-center gap-3">
+            <i class="fa-solid fa-vial text-sky-400"></i>
+            <span>repository</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- SLIDE X: DOMAIN PARA HUMANOS -->
+    <div class="slide">
+      <div class="max-w-5xl m-auto w-full">
+        <h2 class="text-5xl font-bold mb-8 text-center text-emerald-400">
+          El Domain explicado con ejemplos reales
+        </h2>
+
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+          <div class="glass-card p-6">
+            <h4 class="font-bold mb-2 text-emerald-300">Banco</h4>
+            <p class="text-sm text-slate-300">
+              Las reglas del banco no dependen del cajero, la app o la web.
+            </p>
+          </div>
+
+          <div class="glass-card p-6">
+            <h4 class="font-bold mb-2 text-emerald-300">Restaurante</h4>
+            <p class="text-sm text-slate-300">
+              La receta no depende del plato ni del mesero.
+            </p>
+          </div>
+
+          <div class="glass-card p-6">
+            <h4 class="font-bold mb-2 text-emerald-300">E-commerce</h4>
+            <p class="text-sm text-slate-300">
+              Las reglas de precios y descuentos no dependen de la UI.
+            </p>
+          </div>
+        </div>
+
+        <p class="mt-6 text-center text-slate-500 italic">
+          Eso es Domain: reglas puras, sin tecnología.
+        </p>
+      </div>
+    </div>
+
+    <!-- SLIDE 4: DOMAIN - REPOSITORY INTERFACES -->
+    <div class="slide">
+      <div
+        class="max-w-5xl m-auto w-full grid grid-cols-1 md:grid-cols-2 gap-10"
+      >
+        <div>
+          <span class="layer-badge bg-emerald-500/20 text-emerald-400"
+            >Domain: Repositories</span
+          >
+          <h2 class="text-4xl font-bold mt-4 mb-6">Repository Interface</h2>
+          <p class="text-slate-300 mb-6 leading-relaxed">
+            <b>¿Qué es?</b> Es un contrato. Define qué datos necesita la app sin
+            saber de dónde vienen (Red o Local).
+          </p>
+          <div
+            class="bg-emerald-500/10 p-4 rounded-lg border border-emerald-500/20"
+          >
+            <h4 class="font-bold text-emerald-400 mb-2">¿Para qué se usa?</h4>
+            <p class="text-sm">
+              Para aplicar <b>Inversión de Dependencia</b>. El dominio dicta las
+              reglas, la capa de data las obedece.
+            </p>
+          </div>
+        </div>
+        <pre
+          class="code-font text-emerald-300"
+        ><code><span class="text-slate-500">// Contrato puro en Domain</span>
+<span class="text-emerald-500">interface</span> ProductRepository {
+    <span class="text-emerald-500">suspend fun</span> getProducts(): List&lt;Product&gt;
+}</code></pre>
+      </div>
+    </div>
+
+    <!-- SLIDE 5: DOMAIN - USE CASES -->
+    <div class="slide">
+      <div
+        class="max-w-5xl m-auto w-full grid grid-cols-1 md:grid-cols-2 gap-10"
+      >
+        <div>
+          <span class="layer-badge bg-emerald-500/20 text-emerald-400"
+            >Domain: UseCase</span
+          >
+          <h2 class="text-4xl font-bold mt-4 mb-6">Use Cases</h2>
+          <p class="text-slate-300 mb-6 leading-relaxed">
+            <b>¿Qué es?</b> Una clase que representa una única acción de
+            negocio.
+          </p>
+          <ul class="space-y-3 text-sm text-slate-400 mb-6">
+            <li>
+              <i class="fa-solid fa-bolt text-emerald-500 mr-2"></i> Solo tienen
+              1 responsabilidad.
+            </li>
+            <li>
+              <i class="fa-solid fa-bolt text-emerald-500 mr-2"></i> Orquestan
+              varios repositorios si es necesario.
+            </li>
+            <li>
+              <i class="fa-solid fa-bolt text-emerald-500 mr-2"></i> Usan el
+              operador <code class="text-emerald-400">invoke</code>.
+            </li>
+          </ul>
+        </div>
+        <pre
+          class="code-font text-emerald-300"
+        ><code><span class="text-emerald-500">class</span> GetProductsUseCase(
+    <span class="text-emerald-500">private val</span> repo: ProductRepository
+) {
+    <span class="text-slate-500">// Operador que permite llamar: 
+    // useCase()</span>
+    <span class="text-emerald-500">suspend operator fun</span> invoke(): List&lt;Product&gt; {
+        <span class="text-emerald-500">return</span> repo.getProducts()
+    }
+}</code></pre>
+      </div>
+    </div>
+
+    <!-- SLIDE NUEVO: CUÁNDO CREAR USE CASES -->
+    <div class="slide">
+      <div class="max-w-6xl m-auto w-full">
+        <h2 class="text-4xl font-bold mb-8 text-center text-emerald-400">
+          🎭 Use Cases: ¿Cuándo crearlos?
+        </h2>
+
+        <p class="text-center text-lg text-slate-300 mb-8">
+          No todos los casos necesitan un UseCase. Aquí está el criterio:
+        </p>
+
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
+          <!-- Cuando SÍ crear UseCase -->
+          <div class="glass-card p-6 border-l-4 border-emerald-500">
+            <h4 class="font-bold mb-4 text-emerald-400 flex items-center gap-2">
+              <i class="fa-solid fa-check-circle"></i>
+              ✅ CREAR UseCase cuando:
+            </h4>
+            <ul class="space-y-3 text-sm text-slate-300">
+              <li class="flex gap-2">
+                <span class="text-emerald-400">•</span>
+                <span>Hay <b>lógica de negocio</b> (validaciones, cálculos, reglas)</span>
+              </li>
+              <li class="flex gap-2">
+                <span class="text-emerald-400">•</span>
+                <span>Se <b>combinan múltiples repositorios</b></span>
+              </li>
+              <li class="flex gap-2">
+                <span class="text-emerald-400">•</span>
+                <span>La operación es <b>reutilizable</b> en varias pantallas</span>
+              </li>
+              <li class="flex gap-2">
+                <span class="text-emerald-400">•</span>
+                <span>Necesitas <b>transformar datos</b> de forma compleja</span>
+              </li>
+              <li class="flex gap-2">
+                <span class="text-emerald-400">•</span>
+                <span>Quieres <b>testear la lógica</b> independientemente</span>
+              </li>
+            </ul>
+          </div>
+
+          <!-- Cuando NO crear UseCase -->
+          <div class="glass-card p-6 border-l-4 border-rose-500">
+            <h4 class="font-bold mb-4 text-rose-400 flex items-center gap-2">
+              <i class="fa-solid fa-times-circle"></i>
+              ❌ NO crear UseCase cuando:
+            </h4>
+            <ul class="space-y-3 text-sm text-slate-300">
+              <li class="flex gap-2">
+                <span class="text-rose-400">•</span>
+                <span>Solo es un <b>CRUD simple</b> sin lógica (ej: getUserById)</span>
+              </li>
+              <li class="flex gap-2">
+                <span class="text-rose-400">•</span>
+                <span>Solo <b>delega</b> al repository sin agregar valor</span>
+              </li>
+              <li class="flex gap-2">
+                <span class="text-rose-400">•</span>
+                <span>La operación <b>no se reutiliza</b> nunca</span>
+              </li>
+              <li class="flex gap-2">
+                <span class="text-rose-400">•</span>
+                <span>Es un <b>getter directo</b> de datos</span>
+              </li>
+            </ul>
+
+            <div class="mt-4 p-3 bg-amber-500/10 border border-amber-500/20 rounded text-xs text-amber-300">
+              <i class="fa-solid fa-info-circle"></i>
+              En estos casos, el ViewModel puede llamar directamente al Repository
+            </div>
+          </div>
+        </div>
+
+        <!-- Ejemplos de Código -->
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+          <!-- Ejemplo MALO -->
+          <div class="glass-card p-6 border-l-4 border-rose-500">
+            <h4 class="font-bold mb-3 text-rose-400 text-sm">
+              ❌ UseCase innecesario (solo delega)
+            </h4>
+            <pre class="code-font text-xs text-rose-300"><code>class GetProductByIdUseCase(
+    private val repo: IProductRepository
+) {
+    suspend operator fun invoke(id: String): Product {
+        return repo.getProductById(id)
+        // 🚨 No aporta nada de valor
+        // 🚨 Solo es un "pass-through"
+    }
+}
+
+// ViewModel
+class ProductDetailViewModel(
+    private val useCase: GetProductByIdUseCase
+) {
+    fun loadProduct(id: String) {
+        // Mejor llamar directo al repo
+    }
+}</code></pre>
+          </div>
+
+          <!-- Ejemplo BUENO -->
+          <div class="glass-card p-6 border-l-4 border-emerald-500">
+            <h4 class="font-bold mb-3 text-emerald-400 text-sm">
+              ✅ UseCase con lógica real
+            </h4>
+            <pre class="code-font text-xs text-emerald-300"><code>class GetDiscountedProductsUseCase(
+    private val productRepo: IProductRepository,
+    private val userRepo: IUserRepository
+) {
+    suspend operator fun invoke(): List&lt;Product&gt; {
+        // ✅ Combina 2 repositorios
+        val userTier = userRepo.getCurrentUser().tier
+        
+        // ✅ Aplica lógica de negocio
+        return productRepo.getProducts()
+            .filter { it.stock > 0 }
+            .filter { it.discount > 0 }
+            .map { product ->
+                product.copy(
+                    finalPrice = calculatePrice(
+                        product, 
+                        userTier
+                    )
+                )
+            }
+    }
+    
+    private fun calculatePrice(
+        product: Product, 
+        tier: UserTier
+    ): Double {
+        // Lógica de descuento por tier
+    }
+}</code></pre>
+          </div>
+        </div>
+
+        <div class="mt-6 p-4 bg-sky-500/10 border border-sky-500/20 rounded-lg">
+          <p class="text-center text-sky-300 text-sm">
+            <i class="fa-solid fa-graduation-cap text-sky-400"></i>
+            <b>Tip:</b> Si tu UseCase tiene menos de 5 líneas y solo llama a un método del repo, 
+            <b>probablemente no lo necesitas</b>
+          </p>
+        </div>
+      </div>
+    </div>
+
+    <!-- SLIDE 5: DOMAIN - MODEL -->
+    <div class="slide">
+      <div
+        class="max-w-5xl m-auto w-full grid grid-cols-1 md:grid-cols-2 gap-10"
+      >
+        <div>
+          <span class="layer-badge bg-emerald-500/20 text-emerald-400"
+            >Domain: Model</span
+          >
+          <h2 class="text-4xl font-bold mt-4 mb-6">Models (Entities)</h2>
+          <p class="text-slate-300 mb-6 leading-relaxed">
+            <b>¿Qué es?</b> Son las clases que representan los conceptos
+            principales del negocio. Son puros, sin dependencias técnicas.
+          </p>
+          <ul class="space-y-3 text-sm text-slate-400 mb-6">
+            <li>
+              <i class="fa-solid fa-gem text-emerald-500 mr-2"></i>
+              Definen la estructura de datos del negocio
+            </li>
+            <li>
+              <i class="fa-solid fa-gem text-emerald-500 mr-2"></i>
+              Contienen validaciones y reglas de negocio
+            </li>
+            <li>
+              <i class="fa-solid fa-gem text-emerald-500 mr-2"></i>
+              Son 100% independientes de frameworks
+            </li>
+            <li>
+              <i class="fa-solid fa-gem text-emerald-500 mr-2"></i>
+              Compartidos entre todas las plataformas (KMP)
+            </li>
+          </ul>
+
+          <div
+            class="bg-emerald-500/10 p-4 rounded-lg border border-emerald-500/20"
+          >
+            <h4 class="font-bold text-emerald-400 mb-2">¿Por qué en Domain?</h4>
+            <p class="text-sm">
+              Porque representan la "verdad" del negocio. No deben cambiar si
+              cambiamos la base de datos, la API o la UI.
+            </p>
+          </div>
+        </div>
+        <div>
+          <pre
+            class="code-font text-emerald-300"
+          ><code><span class="text-slate-500">// shared/src/commonMain/kotlin/domain/model</span>
+<span class="text-emerald-500">data class</span> Product(
+    <span class="text-emerald-500">val</span> id: String,
+    <span class="text-emerald-500">val</span> name: String,
+    <span class="text-emerald-500">val</span> description: String,
+    <span class="text-emerald-500">val</span> price: Double,
+    <span class="text-emerald-500">val</span> imageUrl: String,
+    <span class="text-emerald-500">val</span> category: Category,
+    <span class="text-emerald-500">val</span> inStock: Boolean
+) {
+    <span class="text-slate-500">// Reglas de negocio</span>
+    <span class="text-emerald-500">fun</span> isValidForSale(): Boolean {
+        <span class="text-emerald-500">return</span> name.isNotBlank() && 
+               price > 0 && 
+               inStock
+    }
+    
+    <span class="text-emerald-500">fun</span> getFormattedPrice(): String {
+        <span class="text-emerald-500">return</span> <span class="text-amber-400">"$%.2f"</span>.format(price)
+    }
+}
+
+<span class="text-emerald-500">data class</span> Category(
+    <span class="text-emerald-500">val</span> id: String,
+    <span class="text-emerald-500">val</span> name: String
+)
+
+<span class="text-slate-500">// ✅ Puro Kotlin, sin Android/iOS dependencies</span>
+<span class="text-slate-500">// ✅ Compartido 100% en KMP</span>
+<span class="text-slate-500">// ✅ Testeable sin infraestructura</span></code></pre>
+        </div>
+      </div>
+    </div>
+
+    <!-- SLIDE: PORTADA DATA -->
+    <div class="slide">
+      <div class="m-auto text-center">
+        <h1
+          class="text-7xl font-bold mb-6 bg-gradient-to-r from-amber-400 to-rose-400 bg-clip-text text-transparent"
+        >
+          DATA
+        </h1>
+        <p class="text-2xl text-slate-400 max-w-3xl mx-auto">
+          Capa que implementa la lógica de acceso a datos
+        </p>
+        <div class="mt-12 flex gap-4 justify-center">
+          <div class="px-6 py-3 glass-card flex items-center gap-3">
+            <i class="fa-solid fa-database text-amber-400"></i>
+            <span>Repository Impl</span>
+          </div>
+          <div class="px-6 py-3 glass-card flex items-center gap-3">
+            <i class="fa-solid fa-exchange-alt text-rose-400"></i>
+            <span>Mappers</span>
+          </div>
+          <div class="px-6 py-3 glass-card flex items-center gap-3">
+            <i class="fa-solid fa-globe text-sky-400"></i>
+            <span>DTOs / ApiServices</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- SLIDE: DATA PARA HUMANOS -->
+    <div class="slide">
+      <div class="max-w-5xl m-auto w-full">
+        <h2 class="text-5xl font-bold mb-8 text-center text-amber-400">
+          La capa Data explicada con ejemplos reales
+        </h2>
+
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+          <div class="glass-card p-6">
+            <h4 class="font-bold mb-2 text-amber-300">Biblioteca</h4>
+            <p class="text-sm text-slate-300">
+              El bibliotecario que encuentra los libros en las bases de datos y
+              los entrega en el formato correcto.
+            </p>
+          </div>
+
+          <div class="glass-card p-6">
+            <h4 class="font-bold mb-2 text-amber-300">Restaurante</h4>
+            <p class="text-sm text-slate-300">
+              El chef que toma los ingredientes crudos (API) y los prepara según
+              la receta (dominio).
+            </p>
+          </div>
+
+          <div class="glass-card p-6">
+            <h4 class="font-bold mb-2 text-amber-300">E-commerce</h4>
+            <p class="text-sm text-slate-300">
+              El sistema que obtiene productos de la API, los limpia y los
+              convierte al formato del negocio.
+            </p>
+          </div>
+        </div>
+
+        <p class="mt-6 text-center text-slate-500 italic">
+          Data es el puente entre el mundo técnico (APIs, Bases de Datos) y el
+          mundo del negocio (Domain).
+        </p>
+      </div>
+    </div>
+
+    <!-- SLIDE: DATA - REPOSITORY IMPLEMENTATION -->
+    <div class="slide">
+      <div
+        class="max-w-5xl m-auto w-full grid grid-cols-1 md:grid-cols-2 gap-10"
+      >
+        <div>
+          <span class="layer-badge bg-amber-500/20 text-amber-400"
+            >Data: Repository Implementation</span
+          >
+          <h2 class="text-4xl font-bold mt-4 mb-6">
+            Repository Implementation
+          </h2>
+          <p class="text-slate-300 mb-6 leading-relaxed">
+            <b>¿Qué es?</b> Es la clase concreta que implementa el contrato del
+            Repository definido en Domain.
+          </p>
+          <ul class="space-y-3 text-sm text-slate-400 mb-6">
+            <li>
+              <i class="fa-solid fa-cog text-amber-500 mr-2"></i>
+              Implementa la interface del Domain
+            </li>
+            <li>
+              <i class="fa-solid fa-cog text-amber-500 mr-2"></i>
+              Conecta con APIs, bases de datos, caché
+            </li>
+            <li>
+              <i class="fa-solid fa-cog text-amber-500 mr-2"></i>
+              Maneja errores y estados de red
+            </li>
+            <li>
+              <i class="fa-solid fa-cog text-amber-500 mr-2"></i>
+              Siempre retorna modelos de Domain (nunca DTOs)
+            </li>
+          </ul>
+
+          <div
+            class="bg-amber-500/10 p-4 rounded-lg border border-amber-500/20"
+          >
+            <h4 class="font-bold text-amber-400 mb-2">¿Por qué en Data?</h4>
+            <p class="text-sm">
+              Porque contiene detalles técnicos (Ktor, SQL) que no deben
+              contaminar el Domain puro.
+            </p>
+          </div>
+        </div>
+        <div>
+          <pre
+            class="code-font text-slate-300"><code><span class="text-slate-500">// shared/src/commonMain/kotlin/data/repository</span>
+<span class="text-amber-400">class</span> ProductRepositoryImpl(
+    <span class="text-amber-400">private val</span> apiService: KtorApiService,
+    <span class="text-amber-400">private val</span> mapper: ProductMapper
+) : ProductRepository {
+
+<span class="text-amber-400">override suspend fun</span> getProducts(): List&lt;Product&gt; {
+    <span class="text-slate-500">// 1. Obtenemos datos crudos (DTOs)</span>
+    <span class="text-amber-400">return try</span> {
+        apiService.fetchProducts()
+            .map { dto -> 
+                <span class="text-slate-500">// 2. Convertimos a Domain</span>
+                dto.toDomain() 
+            }
+    } <span class="text-amber-400">catch</span> (e: Exception) {
+        <span class="text-slate-500">// 3. Manejo de errores</span>
+        <span class="text-amber-400">throw</span> DataException(<span class="text-emerald-400">"Failed to fetch products"</span>, e)
+    }
+}
+
+<span class="text-amber-400">override suspend fun</span> getProductById(id: String): Product {
+    <span class="text-amber-400">val</span> dto = apiService.fetchProductById(id)
+    <span class="text-amber-400">return</span> dto.toDomain()
+}
+}
+
+<span class="text-emerald-400">// ✅ Implementación concreta</span>
+<span class="text-emerald-400">// ✅ Conecta con APIs</span>
+<span class="text-emerald-400">// ✅ Siempre retorna Domain models</span></code></pre>
+        </div>
+      </div>
+    </div>
+
+    <div class="slide">
+      <div class="max-w-5xl m-auto w-full grid grid-cols-1 md:grid-cols-2 gap-10">
+        <div>
+          <span class="layer-badge bg-amber-500/20 text-amber-400">Data: DataResource</span>
+          <h2 class="text-4xl font-bold mt-4 mb-6">DataResource / Data Source</h2>
+          <p class="text-slate-300 mb-6 leading-relaxed">
+            <b>¿Qué contiene?</b> Los DataResources son responsables de obtener y almacenar datos desde fuentes técnicas: Remote (APIs), Local (DB), y Cache. Orquestan llamadas, manejan paginación, retries, autenticación y adaptan el formato crudo hacia DTOs.
+          </p>
+
+          <ul class="space-y-3 text-sm text-slate-400 mb-6">
+            <li>• RemoteDataSource: Llama a `ApiService` y devuelve DTOs.</li>
+            <li>• LocalDataSource: Lee/Escribe en la base de datos (Room/SQL).</li>
+            <li>• Cache: Memoria temporal para performance y offline.</li>
+            <li>• Coordinador: Decide cuándo usar Remote vs Local y aplica políticas.</li>
+            <li>• Responsable de conversiones técnicas (formato, headers, tokens).</li>
+          </ul>
+
+          <div class="bg-amber-500/10 p-4 rounded-lg border border-amber-500/20">
+            <h4 class="font-bold text-amber-400 mb-2">Buena práctica</h4>
+            <p class="text-sm">Mantener DataResources delgados: devolver DTOs o respuestas técnicas; dejar la conversión a Domain en Mappers/Repository impl.</p>
+          </div>
+        </div>
+        <div>
+          <pre class="code-font text-slate-300"><code><span class="text-slate-500">// Ejemplo: Remote DataSource (interfaz)</span>
+<span class="text-amber-400">interface</span> ProductRemoteDataSource {
+    <span class="text-amber-400">suspend fun</span> fetchProducts(): List&lt;ProductDto&gt;
+    <span class="text-amber-400">suspend fun</span> fetchProductById(id: String): ProductDto
+}
+
+<span class="text-slate-500">// Implementación usa ApiService internamente</span>
+<span class="text-amber-400">class</span> ProductRemoteDataSourceImpl(<span class="text-amber-400">private val</span> api: KtorApiService): ProductRemoteDataSource {
+    <span class="text-amber-400">override suspend fun</span> fetchProducts() = api.fetchProducts()
+    <span class="text-amber-400">override suspend fun</span> fetchProductById(id: String) = api.fetchProductById(id)
+}
+
+<span class="text-emerald-400">// ✅ Separación clara: ApiService = cliente HTTP, DataSource = lógica de acceso</span>
+</code></pre>
+        </div>
+      </div>
+    </div>
+
+
+    <div class="slide">
+      <div class="max-w-5xl m-auto w-full grid grid-cols-1 md:grid-cols-2 gap-10">
+        <div>
+          <span class="layer-badge bg-amber-500/20 text-amber-400">Data: Models / DTOs</span>
+          <h2 class="text-4xl font-bold mt-4 mb-6">Modelos de Transporte (DTOs)</h2>
+          <p class="text-slate-300 mb-6 leading-relaxed">
+            <b>¿Qué son?</b> DTOs representan exactamente cómo vienen los datos desde la API o la BD. Son serializables y pueden contener campos nulos o formatos distintos al Domain.
+          </p>
+
+          <ul class="space-y-3 text-sm text-slate-400 mb-6">
+            <li>• Diseñados para transporte/serialización.</li>
+            <li>• Pueden tener nombres distintos y tipos laxos (ej. número como String).</li>
+            <li>• No deben escapar al Domain: mapearlos siempre a Models puros.</li>
+            <li>• Mantener validaciones y normalizaciones fuera del Domain (en Mappers).</li>
+          </ul>
+
+          <div class="bg-amber-500/10 p-4 rounded-lg border border-amber-500/20">
+            <h4 class="font-bold text-amber-400 mb-2">Regla</h4>
+            <p class="text-sm">DTO → Mapper → Domain Model. Nunca usar DTOs directamente en UseCases o ViewModels.</p>
+          </div>
+        </div>
+        <div>
+          <pre class="code-font text-slate-300"><code><span class="text-slate-500">// shared/src/commonMain/kotlin/data/dto</span>
+<span class="text-sky-400">@Serializable</span>
+<span class="text-amber-400">data class</span> ProductDto(
+    <span class="text-amber-400">val</span> id: String? = <span class="text-rose-400">null</span>, <span class="text-slate-500">// Puede venir null</span>
+    <span class="text-amber-400">val</span> product_name: String,
+    <span class="text-amber-400">val</span> price: String, <span class="text-slate-500">// A veces viene como String</span>
+    <span class="text-amber-400">val</span> image_url: String? = <span class="text-rose-400">null</span>,
+    <span class="text-amber-400">val</span> category_info: CategoryDto?
+)
+
+<span class="text-sky-400">@Serializable</span>
+<span class="text-amber-400">data class</span> CategoryDto(
+    <span class="text-amber-400">val</span> cat_id: String,
+    <span class="text-amber-400">val</span> cat_name: String
+)
+
+<span class="text-slate-500">// Cliente HTTP (ApiService) devuelve DTOs</span>
+<span class="text-amber-400">class</span> KtorApiService(<span class="text-amber-400">private val</span> httpClient: HttpClient) {
+    <span class="text-amber-400">suspend fun</span> fetchProducts(): List&lt;ProductDto&gt; = httpClient.get(<span class="text-emerald-400">"/products"</span>).body()
+    <span class="text-amber-400">suspend fun</span> fetchProductById(id: String): ProductDto = httpClient.get(<span class="text-emerald-400">"/products/$id"</span>).body()
+}
+</code></pre>
+        </div>
+      </div>
+    </div>
+
+    <!-- SLIDE 6: DATA - MAPPERS -->
+    <div class="slide">
+      <div
+        class="max-w-5xl m-auto w-full grid grid-cols-1 md:grid-cols-2 gap-10"
+      >
+        <div>
+          <span class="layer-badge bg-amber-500/20 text-amber-400"
+            >Data: Mappers</span
+          >
+          <h2 class="text-4xl font-bold mt-4 mb-6">Mappers</h2>
+          <p class="text-slate-300 mb-6 leading-relaxed">
+            <b>¿Qué es?</b> Traduce entre capas: DTO ↔ Domain ↔ Presentation. Se
+            asegura de normalizar formatos, validar campos y mantener
+            invariantes.
+          </p>
+          <div
+            class="bg-amber-500/10 p-4 rounded-lg border border-amber-500/20"
+          >
+            <h4 class="font-bold text-amber-400 mb-2">Buenas prácticas</h4>
+            <ul class="text-sm text-slate-300 space-y-2">
+              <li>• Mappers puros y testeables (sin efectos secundarios).</li>
+              <li>
+                • Manejar nulls y formatos inconsistentes aquí, no en el Domain.
+              </li>
+              <li>
+                • Mapear tanto DTO → Domain como Domain → DTO cuando sea
+                necesario.
+              </li>
+              <li>
+                • Mantener mapeos simples; extraer transformaciones complejas a
+                helpers.
+              </li>
+            </ul>
+          </div>
+        </div>
+        <pre class="code-font text-slate-300"><code><span class="text-slate-500">// DTO -> Domain</span>
+<span class="text-amber-400">fun</span> ProductDTO.toDomain(): Product {
+    <span class="text-amber-400">return</span> Product(
+        id = id,
+        title = title,
+        price = Price(
+            amount = (price * <span class="text-sky-400">100</span>).toLong(),
+            currency = <span class="text-emerald-400">"USD"</span>
+        ),
+        description = description,
+        category = category,
+        image = image
+
+    )
+}
+
+<span class="text-slate-500">// Tests: ejemplo simple</span>
+<span class="text-slate-500">// dto = ProductDto(id = null, product_name = "X", price = null)</span>
+<span class="text-slate-500">// domain = dto.toDomain(); domain.id == "unknown" && domain.price == 0.0</span>
+</code></pre>
+      </div>
+    </div>
+
+    <!-- SLIDE: DOMAIN vs DATA MODEL -->
+    <div class="slide">
+      <div class="max-w-5xl m-auto w-full">
+        <h2 class="text-5xl font-bold mb-8 text-center text-emerald-400">
+          Domain Model vs Data Model
+        </h2>
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+          <div class="glass-card p-6">
+            <h4 class="font-bold mb-3 text-emerald-400">
+              Domain Model (Modelos de negocio)
+            </h4>
+            <ul class="text-slate-300 text-sm space-y-2">
+              <li>• Representan la "verdad" del negocio (invariantes).</li>
+              <li>• Tipos seguros y no nulos cuando corresponde.</li>
+              <li>• Métodos y validaciones (reglas de negocio).</li>
+              <li>• Independientes de APIs, BD o UI.</li>
+            </ul>
+          </div>
+          <div class="glass-card p-6">
+            <h4 class="font-bold mb-3 text-amber-400">
+              Data Model / DTO (Modelos de transporte)
+            </h4>
+            <ul class="text-slate-300 text-sm space-y-2">
+              <li>
+                • Formato crudo venido de la API o BD (nombres y tipos
+                distintos).
+              </li>
+              <li>• Campos opcionales, nulos o formatos inconsistentes.</li>
+              <li>• Pensados para transporte/serialización, no para reglas.</li>
+              <li>• Cambian cuando la API cambia.</li>
+            </ul>
+          </div>
+        </div>
+      </div>
+    </div>
+
+   
+    
+    <!-- SLIDE: PORTADA DI -->
+    <div class="slide">
+      <div class="m-auto text-center">
+        <h1
+          class="text-7xl font-bold mb-6 bg-gradient-to-r from-rose-400 to-amber-400 bg-clip-text text-transparent"
+        >
+          DI
+        </h1>
+        <p class="text-2xl text-slate-400 max-w-3xl mx-auto">
+          Configuración e inyección de dependencias (módulos, providers,
+          factories)
+        </p>
+        <div class="mt-12 flex gap-4 justify-center">
+          <div class="px-6 py-3 glass-card flex items-center gap-3">
+            <i class="fa-solid fa-sitemap text-rose-400"></i>
+            <span>Módulos</span>
+          </div>
+          <div class="px-6 py-3 glass-card flex items-center gap-3">
+            <i class="fa-solid fa-cube text-amber-400"></i>
+            <span>Providers / Singletons</span>
+          </div>
+          <div class="px-6 py-3 glass-card flex items-center gap-3">
+            <i class="fa-solid fa-factory text-sky-400"></i>
+            <span>Factories</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+
+      <div class="slide">
+        <div class="max-w-4xl w-full mx-auto flex flex-col items-center justify-center h-full">
+            <h2 class="text-4xl font-bold mb-12 flex items-center justify-center gap-4 text-center">
+              <span class="p-3 rounded-2xl bg-amber-500/20 text-amber-400"><i class="fas fa-project-diagram"></i></span>
+              ¿Por qué usar DI?
+            </h2>
+          <div class="grid grid-cols-2 gap-8 w-full">
+            <div class="glass p-8 rounded-3xl border-l-4 border-rose-500 flex flex-col items-center text-center">
+              <h3 class="text-xl font-bold text-rose-400 mb-4 uppercase tracking-tighter">Sin DI (Caos)</h3>
+              <p class="text-slate-400 text-sm leading-relaxed">
+                Las clases crean sus propias dependencias. Si cambias un motor de base de datos, tienes que modificar 20 archivos. <b>Acoplamiento total.</b>
+              </p>
+            </div>
+            <div class="glass p-8 rounded-3xl border-l-4 border-emerald-500 flex flex-col items-center text-center">
+              <h3 class="text-xl font-bold text-emerald-400 mb-4 uppercase tracking-tighter">Con DI (Orden)</h3>
+              <p class="text-slate-400 text-sm leading-relaxed">
+                Las clases solo piden lo que necesitan. <b>Koin</b> centraliza la creación. Cambiar una implementación es tocar un solo archivo.
+              </p>
+            </div>
+          </div>
+        </div>
+      </div>
+      
+
+<div class="slide">
+    <div class="max-w-5xl m-auto w-full">
+        <h2 class="text-5xl font-bold mb-12 text-center text-emerald-400">
+            La DI explicada con ejemplos reales
+        </h2>
+
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+            <!-- Ejemplo 1 -->
+            <div class="glass-card text-center">
+                <div class="mb-4 text-emerald-400 text-3xl">
+                    <i class="fa-solid fa-bolt"></i>
+                </div>
+                <h4 class="font-bold text-xl mb-2 text-emerald-300">Electricidad</h4>
+                <p class="text-sm text-slate-300">
+                    El enchufe no depende de si la energía es solar, eólica o térmica. Solo necesita que cumpla el estándar.
+                </p>
+            </div>
+
+            <!-- Ejemplo 2 -->
+            <div class="glass-card text-center">
+                <div class="mb-4 text-emerald-400 text-3xl">
+                    <i class="fa-solid fa-lightbulb"></i>
+                </div>
+                <h4 class="font-bold text-xl mb-2 text-emerald-300">Lámpara</h4>
+                <p class="text-sm text-slate-300">
+                    La lámpara no fabrica su propia bombilla; recibe una que encaje en el socket (la interfaz).
+                </p>
+            </div>
+
+            <!-- Ejemplo 3 -->
+            <div class="glass-card text-center">
+                <div class="mb-4 text-emerald-400 text-3xl">
+                    <i class="fa-solid fa-utensils"></i>
+                </div>
+                <h4 class="font-bold text-xl mb-2 text-emerald-300">Restaurante</h4>
+                <p class="text-sm text-slate-300">
+                    El comensal pide un plato, no depende de qué cocinero específico esté en la cocina ese día.
+                </p>
+            </div>
+        </div>
+
+        <p class="mt-8 text-center text-slate-500 italic text-xl">
+            Eso es DI: tú pides lo que necesitas, alguien más te lo entrega.
+        </p>
+    </div>
+</div>
+
+
+  
+<div class="slide">
+<div class="max-w-5xl w-full mx-auto flex flex-col items-center justify-center h-full">
+<h2 class="text-3xl font-bold text-amber-400 mb-12 text-center uppercase tracking-widest">Conceptos Clave en Koin</h2>
+<div class="grid grid-cols-2 gap-8 w-full">
+<!-- Single -->
+<div class="glass p-8 rounded-2xl border border-white/5 relative overflow-hidden flex flex-col items-center text-center">
+<div class="absolute top-0 right-0 p-4 opacity-10">
+<i class="fas fa-database text-6xl"></i>
+</div>
+<h4 class="text-2xl font-bold text-emerald-400 mb-3 font-mono">single { ... }</h4>
+<p class="text-slate-400 text-sm mb-6">Crea un <b>Singleton</b>. La misma instancia vive durante todo el ciclo de vida de la app.</p>
+<div class="bg-slate-900/50 p-4 rounded-xl border border-white/5 w-full">
+<code class="text-emerald-300 text-xs">single { ProductApiService(get()) }</code>
+</div>
+</div>
+<!-- Factory -->
+<div class="glass p-8 rounded-2xl border border-white/5 relative overflow-hidden flex flex-col items-center text-center">
+<div class="absolute top-0 right-0 p-4 opacity-10">
+<i class="fas fa-industry text-6xl"></i>
+</div>
+<h4 class="text-2xl font-bold text-sky-400 mb-3 font-mono">factory { ... }</h4>
+<p class="text-slate-400 text-sm mb-6">Crea una <b>nueva instancia</b> cada vez que se solicita. No guarda estado.</p>
+<div class="bg-slate-900/50 p-4 rounded-xl border border-white/5 w-full">
+<code class="text-sky-300 text-xs">factory { GetProductsUseCase(get()) }</code>
+</div>
+</div>
+</div>
+</div>
+</div>
+
+<!-- Diapositiva 34: Organización de Módulos (CÓDIGO ANCHO) -->
+
+<div class="slide">
+<div class="wide-code space-y-4 mx-auto flex flex-col items-center justify-center h-full">
+<div class="flex items-center justify-center gap-4 mb-4 text-center">
+<span class="p-3 rounded-2xl bg-amber-500/20 text-amber-400"><i class="fas fa-folder-tree"></i></span>
+<h2 class="text-3xl font-bold">Organización de Módulos</h2>
+</div>
+<div class="glass p-8 rounded-2xl border border-white/5 w-full">
+<pre class="code-font text-sm leading-relaxed text-amber-200">
+<span class="text-slate-500">// Separar los módulos por capas refuerza la arquitectura</span>
+val dataModule = module {
+single { ProductApiService(get()) }
+single&lt;ProductRepository&gt; { ProductRepositoryImp(get()) }
+}
+
+val domainModule = module {
+factory { GetProductsUseCase(get()) }
+}
+
+val viewModelModule = module {
+viewModel { ProductViewModel(get()) } <span class="text-slate-500">// Inyecta el Caso de Uso</span>
+}</pre>
+</div>
+
+</div>
+</div>
+
+<!-- Diapositiva 35: Inicialización KMP -->
+
+<div class="slide">
+<div class="max-w-4xl w-full mx-auto flex flex-col items-center justify-center h-full">
+<h2 class="text-3xl font-bold text-amber-400 mb-8 flex items-center justify-center gap-3 text-center">
+<i class="fas fa-power-off"></i> El punto de arranque
+</h2>
+<div class="glass p-8 rounded-2xl border-l-4 border-amber-500 w-full mb-8">
+<pre class="code-font text-slate-200 text-sm">
+<span class="text-slate-500">// CommonMain: Estructura compartida</span>
+fun initKoin(appDeclaration: KoinAppDeclaration = {}){
+  startKoin {
+      appDeclaration()
+      modules(dataModule, domainModule, viewModelModule)
+  }
+}
+
+<span class="text-slate-500">// Android: startKoin { androidContext(this) ... }
+// iOS: initKoin() desde Swift al arrancar la App</span></pre>
+</div>
+<div class="grid grid-cols-2 gap-6 w-full">
+<div class="p-6 glass rounded-2xl flex items-center justify-center gap-4">
+<i class="fab fa-android text-3xl text-emerald-500"></i>
+<span class="text-xs text-slate-400 font-bold uppercase tracking-widest text-center leading-tight">Contexto nativo
+
+
+
+inyectado</span>
+</div>
+<div class="p-6 glass rounded-2xl flex items-center justify-center gap-4">
+<i class="fab fa-apple text-3xl text-slate-200"></i>
+<span class="text-xs text-slate-400 font-bold uppercase tracking-widest text-center leading-tight">Instancias listas
+
+
+
+para SwiftUI</span>
+</div>
+</div>
+
+</div>
+</div>
+
+
+
+    
+    <!-- SLIDE: PORTADA PRESENTATION -->
+    <div class="slide">
+      <div class="m-auto text-center">
+        <h1
+          class="text-7xl font-bold mb-6 bg-gradient-to-r from-sky-400 to-emerald-400 bg-clip-text text-transparent"
+        >
+          PRESENTATION
+        </h1>
+        <p class="text-2xl text-slate-400 max-w-3xl mx-auto">
+          Capa responsable de UI, estados y comunicación con UseCases
+        </p>
+        <div class="mt-12 flex gap-4 justify-center">
+          <div class="px-6 py-3 glass-card flex items-center gap-3">
+            <i class="fa-solid fa-tv text-sky-400"></i>
+            <span>Screens</span>
+          </div>
+          <div class="px-6 py-3 glass-card flex items-center gap-3">
+            <i class="fa-solid fa-people-arrows text-emerald-400"></i>
+            <span>ViewModels</span>
+          </div>
+          <div class="px-6 py-3 glass-card flex items-center gap-3">
+            <i class="fa-solid fa-layer-group text-amber-400"></i>
+            <span>UI State</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="slide">
+      <div class="max-w-5xl m-auto w-full grid grid-cols-1 md:grid-cols-2 gap-10">
+        <div>
+          <span class="layer-badge bg-sky-500/20 text-sky-400">Presentation: ViewModel</span>
+          <h2 class="text-4xl font-bold mt-4 mb-6">El ViewModel en KMP</h2>
+          <p class="text-slate-300 mb-6 leading-relaxed">
+            <b>¿Qué es?</b> Es el encargado de mantener el estado de la UI y gestionar los eventos del usuario. No sabe nada de la plataforma (Android/iOS), solo de lógica de presentación.
+          </p>
+          <ul class="space-y-3 text-sm text-slate-400 mb-6">
+            <li><i class="fa-solid fa-microchip text-sky-400 mr-2"></i> Expone el estado mediante <b>StateFlow</b>.</li>
+            <li><i class="fa-solid fa-microchip text-sky-400 mr-2"></i> Llama a los <b>Use Cases</b> para obtener datos.</li>
+            <li><i class="fa-solid fa-microchip text-sky-400 mr-2"></i> Sobrevive a cambios de configuración.</li>
+          </ul>
+          <div class="bg-sky-500/10 p-4 rounded-lg border border-sky-500/20">
+            <h4 class="font-bold text-sky-400 mb-2">Regla de Oro:</h4>
+            <p class="text-sm">El ViewModel recibe <b>Modelos de Dominio</b> y los transforma en <b>UI State</b> para que la pantalla los dibuje fácilmente.</p>
+          </div>
+        </div>
+        <pre class="code-font text-sky-300"><code><span class="text-sky-500">class</span> ProductViewModel(
+    <span class="text-sky-500">private val</span> getProducts: GetProductsUseCase
+) : ViewModel() {
+
+    <span class="text-slate-500">// Estado expuesto a la UI</span>
+    <span class="text-sky-500">private val</span> _state = MutableStateFlow(UiState())
+    <span class="text-sky-500">val</span> state = _state.asStateFlow()
+
+    <span class="text-sky-500">fun</span> load() = viewModelScope.launch {
+        _state.update { it.copy(isLoading = <span class="text-sky-500">true</span>) }
+        <span class="text-sky-500">val</span> result = getProducts()
+        _state.update { it.copy(
+            products = result, 
+            isLoading = <span class="text-sky-500">false</span>
+        )}
+    }
+}</code></pre>
+      </div>
+    </div>
+
+    <div class="slide">
+      <div class="max-w-5xl m-auto w-full grid grid-cols-1 md:grid-cols-2 gap-10">
+        <div>
+          <span class="layer-badge bg-emerald-500/20 text-emerald-400">Presentation: UI (Screens)</span>
+          <h2 class="text-4xl font-bold mt-4 mb-6">La UI (Screens)</h2>
+          <p class="text-slate-300 mb-6 leading-relaxed">
+            <b>¿Qué es?</b> Es la implementación visual (Compose en Android o SwiftUI/Compose en iOS). Su única misión es <b>observar</b> el estado y <b>notificar</b> eventos.
+          </p>
+          <div class="grid grid-cols-2 gap-4 text-xs">
+            <div class="glass-card p-4 border-t-2 border-emerald-500">
+              <b class="text-emerald-400 block mb-1">Declarativa</b>
+              Se reconstruye automáticamente cuando el estado cambia.
+            </div>
+            <div class="glass-card p-4 border-t-2 border-emerald-500">
+              <b class="text-emerald-400 block mb-1">Pasiva</b>
+              No decide qué mostrar; solo obedece al UI State.
+            </div>
+          </div>
+        </div>
+        <pre class="code-font text-emerald-300"><code><span class="text-emerald-500">@Composable</span>
+<span class="text-emerald-500">fun</span> ProductScreen(viewModel: ProductViewModel) {
+    <span class="text-slate-500">// Observamos el estado del ViewModel</span>
+    <span class="text-emerald-500">val</span> state <span class="text-emerald-500">by</span> viewModel.state.collectAsState()
+
+    <span class="text-emerald-500">if</span> (state.isLoading) {
+        LoadingSpinner()
+    } <span class="text-emerald-500">else</span> {
+        ProductList(
+            items = state.products,
+            onItemClick = { viewModel.onSelect(it) }
+        )
+    }
+}</code></pre>
+      </div>
+    </div>
+
+    <div class="slide">
+      <div class="max-w-6xl m-auto w-full">
+        <h2 class="text-5xl font-bold mb-10 text-center text-amber-400">UI Components</h2>
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
+          <div class="glass-card p-6 flex flex-col items-center text-center">
+            <i class="fa-solid fa-puzzle-piece text-4xl text-amber-400 mb-4"></i>
+            <h4 class="font-bold mb-2">Atómicos</h4>
+            <p class="text-xs text-slate-400">Botones, textos y tarjetas pequeñas que no conocen al ViewModel. Son 100% reutilizables.</p>
+          </div>
+          <div class="glass-card p-6 flex flex-col items-center text-center border-b-4 border-amber-500">
+            <i class="fa-solid fa-box-archive text-4xl text-amber-400 mb-4"></i>
+            <h4 class="font-bold mb-2">Stateless</h4>
+            <p class="text-xs text-slate-400">Reciben datos por parámetros y devuelven clicks por lambdas. Fáciles de testear y de ver en Previews.</p>
+          </div>
+          <div class="glass-card p-6 flex flex-col items-center text-center">
+            <i class="fa-solid fa-object-group text-4xl text-amber-400 mb-4"></i>
+            <h4 class="font-bold mb-2">Cohesión</h4>
+            <p class="text-xs text-slate-400">Agrupan lógica visual común para mantener las Screens limpias y legibles.</p>
+          </div>
+        </div>
+        <div class="mt-8 glass-card p-6">
+           <pre class="code-font text-xs text-amber-200"><code><span class="text-slate-500">// Ejemplo de Componente Stateless (Sin estado interno)</span>
+<span class="text-amber-500">@Composable</span>
+<span class="text-amber-500">fun</span> ProductCard(product: Product, onClick: () -> Unit) {
+    Card(modifier = Modifier.clickable { onClick() }) {
+        Text(text = product.name)
+        Text(text = product.getFormattedPrice())
+    }
+}</code></pre>
+        </div>
+      </div>
+    </div>
+
+    
+
+    <!-- SLIDE 8: NAVEGACIÓN TYPE-SAFE -->
+    <!-- <div class="slide">
+      <div class="max-w-5xl m-auto w-full">
+        <h2 class="text-4xl font-bold mb-8">Navegación Type-Safe</h2>
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-10">
+          <div class="space-y-4">
+            <p class="text-slate-300">
+              Adiós a los Strings mágicos (<code class="text-rose-400"
+                >"details/{id}"</code
+              >). Ahora usamos clases de Kotlin serializables.
+            </p>
+            <div
+              class="p-4 bg-sky-500/10 rounded-lg border border-sky-500/20 text-sm"
+            >
+              <b>Ventaja:</b> Si cambias el nombre de una propiedad en la clase,
+              el código no compila si no actualizas la navegación. ¡Cero errores
+              en runtime!
+            </div>
+          </div>
+          <pre
+            class="code-font text-sky-300"
+          ><code><span class="text-slate-500">// 1. Definir Rutas</span>
+<span class="text-sky-500">@Serializable</span>
+<span class="text-sky-500">sealed class</span> Route {
+    <span class="text-sky-500">@Serializable object</span> List
+    <span class="text-sky-500">@Serializable data class</span> Detail(val id: Int)
+}
+
+<span class="text-slate-500">// 2. Navegar</span>
+navController.navigate(Route.Detail(id = 5))</code></pre>
+        </div>
+      </div>
+    </div> -->
+
+    <!-- SLIDE: EJEMPLO REAL E-COMMERCE KMP -->
+    <div class="slide">
+      <div class="max-w-6xl m-auto w-full">
+        <h2 class="text-5xl font-bold mb-10 text-center text-emerald-400">
+          Ejemplo Real: E-commerce KMP
+        </h2>
+
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+          <div class="glass-card p-6">
+            <h4 class="font-bold mb-4 text-sky-400">
+              📱 E-commerce Multiplataforma
+            </h4>
+            <ul class="space-y-2 text-slate-300 text-sm">
+              <li>
+                • <b class="text-emerald-400">Shared:</b> Domain + Data (100%
+                compartido)
+              </li>
+              <li>• <b class="text-amber-400">Android:</b> UI con Compose</li>
+              <li>• <b class="text-rose-400">iOS:</b> UI con SwiftUI</li>
+              <li>
+                • <b class="text-sky-400">API:</b> Ktor Client multiplataforma
+              </li>
+            </ul>
+
+            <div class="mt-4 p-4 bg-slate-800 rounded-lg">
+              <p class="text-xs text-slate-400">
+                <b class="text-amber-400">Flujo KMP:</b><br />
+                Shared UseCase → Shared Repository → Ktor API<br />
+                <b class="text-emerald-400"
+                  >¡Un solo código para lógica de negocio!</b
+                >
+              </p>
+            </div>
+          </div>
+
+          <div class="glass-card p-6">
+            <h4 class="font-bold mb-4 text-emerald-400">
+              🏗️ Estructura KMP + Clean
+            </h4>
+            <pre class="code-font text-xs text-emerald-300"><code>shared/
+├── src/commonMain/kotlin/
+│   ├── domain/
+│   │   ├── model/Product.kt
+│   │   ├── repository/ProductRepository.kt
+│   │   └── usecase/
+│   │       ├── GetProductsUseCase.kt
+│   │       └── GetProductDetailUseCase.kt
+│   ├── data/
+│   │   ├── repository/ProductRepositoryImpl.kt
+│   │   ├── mapper/ProductMapper.kt
+│   │   ├── dto/ProductDto.kt
+│   │   └── datasource/KtorApiService.kt
+│   └── di/  // 🎯 Koin modules
+│       ├── DomainModule.kt
+│       ├── DataModule.kt
+│       └── PresentationModule.kt
+</code></pre>
+          </div>
+        </div>
+
+        <p class="mt-6 text-center text-slate-500 italic">
+          Dos plataformas, una arquitectura, cero duplicación de lógica.
+        </p>
+      </div>
+    </div>
+
+    <!-- SLIDE X: RECURSOS PARA CONTINUAR -->
+    <div class="slide">
+      <div class="max-w-5xl m-auto w-full">
+        <h2 class="text-5xl font-bold mb-10 text-center text-sky-400">
+          Recursos para Continuar Aprendiendo
+        </h2>
+
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+          <div class="glass-card p-6">
+            <h4 class="font-bold mb-4 text-sky-400">📚 Material de Estudio</h4>
+            <ul class="space-y-3 text-sm text-slate-300">
+              <li class="flex items-center gap-3">
+                <i class="fa-solid fa-book text-emerald-400"></i>
+                <span>Clean Architecture - Robert C. Martin</span>
+              </li>
+              <li class="flex items-center gap-3">
+                <i class="fa-solid fa-video text-emerald-400"></i>
+                <span>Android Architecture Blueprints</span>
+              </li>
+              <li class="flex items-center gap-3">
+                <i class="fa-solid fa-code text-emerald-400"></i>
+                <span>KMP Official Documentation</span>
+              </li>
+            </ul>
+          </div>
+
+        </div>
+
+        <div
+          class="mt-8 glass-card p-6 border-2 border-dashed border-sky-400/30"
+        >
+          <div class="flex items-center justify-center gap-4">
+            <i class="fa-solid fa-github text-3xl text-slate-400"></i>
+            <div class="text-center">
+              <p class="text-slate-300 font-bold">
+                Repo del Proyecto E-commerce
+              </p>
+              <p class="text-xs text-slate-500 mt-1">
+                github.com/tu-usuario/ecommerce-kmp-clean
+              </p>
+              <p class="text-xs text-emerald-400 mt-2">
+                🌟 Clona, estudia, modifica
+              </p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- SLIDE 9: GLOSARIO 1 -->
+    <div class="slide">
+      <div class="max-w-6xl m-auto w-full">
+        <h2 class="text-4xl font-bold mb-10 text-center text-emerald-400">
+          Glosario Técnico (Parte 1)
+        </h2>
+        <div class="grid grid-cols-2 md:grid-cols-3 gap-4">
+          <div class="glass-card p-6">
+            <b class="text-emerald-400 block mb-2">Boilerplate</b>
+            <p class="text-xs text-slate-400 leading-relaxed">
+              Código repetitivo y necesario pero que no aporta lógica real (ej.
+              getters, configuraciones).
+            </p>
+          </div>
+          <div class="glass-card p-6">
+            <b class="text-emerald-400 block mb-2">Service Locator</b>
+            <p class="text-xs text-slate-400 leading-relaxed">
+              Patrón que usa Koin para centralizar y "prestar" las dependencias
+              de la app.
+            </p>
+          </div>
+          <div class="glass-card p-6">
+            <b class="text-emerald-400 block mb-2">LaunchedEffect</b>
+            <p class="text-xs text-slate-400 leading-relaxed">
+              Efecto de Compose que ejecuta código (como cargar datos) cuando el
+              componente entra en pantalla.
+            </p>
+          </div>
+          <div class="glass-card p-6">
+            <b class="text-emerald-400 block mb-2">Sealed Interface</b>
+            <p class="text-xs text-slate-400 leading-relaxed">
+              Interfaz cerrada que obliga a manejar todos sus estados (ej.
+              UIState: Loading, Success, Error).
+            </p>
+          </div>
+          <div class="glass-card p-6">
+            <b class="text-emerald-400 block mb-2">State Hoisting</b>
+            <p class="text-xs text-slate-400 leading-relaxed">
+              Técnica de subir el estado de un componente a su padre para
+              hacerlo más reutilizable y testeable.
+            </p>
+          </div>
+          <div class="glass-card p-6">
+            <b class="text-emerald-400 block mb-2">Suspend Function</b>
+            <p class="text-xs text-slate-400 leading-relaxed">
+              Función que puede pausarse (sin bloquear el hilo) mientras espera
+              una respuesta (ej. de internet).
+            </p>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- SLIDE 10: GLOSARIO 2 -->
+    <div class="slide">
+      <div class="max-w-6xl m-auto w-full">
+        <h2 class="text-4xl font-bold mb-10 text-center text-sky-400">
+          Glosario Técnico (Parte 2)
+        </h2>
+        <div class="grid grid-cols-2 md:grid-cols-3 gap-4">
+          <div class="glass-card p-6">
+            <b class="text-sky-400 block mb-2">KMP</b>
+            <p class="text-xs text-slate-400 leading-relaxed">
+              Kotlin Multiplatform. Compartir lógica entre Android, iOS, Web y
+              Desktop.
+            </p>
+          </div>
+          <div class="glass-card p-6">
+            <b class="text-sky-400 block mb-2">DTO</b>
+            <p class="text-xs text-slate-400 leading-relaxed">
+              Data Transfer Object. La forma cruda en que los datos llegan de la
+              API.
+            </p>
+          </div>
+          <div class="glass-card p-6">
+            <b class="text-sky-400 block mb-2">Expect / Actual</b>
+            <p class="text-xs text-slate-400 leading-relaxed">
+              Mecanismo de KMP para definir código compartido que necesita
+              implementación nativa en cada plataforma.
+            </p>
+          </div>
+          <div class="glass-card p-6">
+            <b class="text-sky-400 block mb-2">Ktor</b>
+            <p class="text-xs text-slate-400 leading-relaxed">
+              El cliente HTTP oficial de Kotlin para realizar peticiones de red
+              multiplataforma.
+            </p>
+          </div>
+          <div class="glass-card p-6">
+            <b class="text-sky-400 block mb-2">Compose Multiplatform</b>
+            <p class="text-xs text-slate-400 leading-relaxed">
+              Framework declarativo para crear UIs que corren en múltiples
+              sistemas operativos.
+            </p>
+          </div>
+          <div
+            class="glass-card p-6 flex flex-col justify-center items-center border-2 border-dashed border-sky-400/20"
+          >
+            <i
+              class="fa-solid fa-graduation-cap text-3xl mb-2 text-sky-400"
+            ></i>
+            <span class="text-[10px] uppercase font-bold tracking-widest"
+              >Fin de Glosario</span
+            >
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Controles -->
+    <div
+      class="fixed bottom-10 w-full flex justify-center items-center gap-8 z-50"
+    >
+      <button
+        id="prev"
+        class="w-10 h-10 rounded-full border border-slate-700 flex items-center justify-center hover:bg-slate-800 transition"
+      >
+        <i class="fa-solid fa-arrow-left"></i>
+      </button>
+      <span id="counter" class="text-slate-500 font-bold code-font text-sm"
+        >01 / 41</span
+      >
+      <button
+        id="next"
+        class="w-10 h-10 rounded-full bg-emerald-500 text-slate-900 flex items-center justify-center hover:bg-emerald-400 transition"
+      >
+        <i class="fa-solid fa-arrow-right"></i>
+      </button>
+    </div>
+
+    <script>
+      const slides = document.querySelectorAll(".slide");
+      const counter = document.getElementById("counter");
+      let current = 0;
+
+
+      const menu = document.getElementById("side-menu");
+const menuBtn = document.getElementById("menu-btn");
+const overlay = document.getElementById("menu-overlay");
+
+// Función para abrir/cerrar menú
+function toggleMenu(forceClose = false) {
+  if (forceClose) {
+    menu.classList.remove("open");
+    overlay.classList.remove("show");
+    menuBtn.innerHTML = '<i class="fas fa-bars text-xl"></i>';
+  } else {
+    const isOpen = menu.classList.toggle("open");
+    overlay.classList.toggle("show");
+    menuBtn.innerHTML = isOpen ? '<i class="fas fa-times text-xl"></i>' : '<i class="fas fa-bars text-xl"></i>';
+  }
+}
+
+// Función para saltar a una diapositiva desde el índice
+function goToSlide(n) {
+  current = n;
+  update();
+  toggleMenu(true); // Cierra el menú al navegar
+}
+
+// Eventos de clic
+menuBtn.onclick = () => toggleMenu();
+overlay.onclick = () => toggleMenu(true);
+
+
+      function update() {
+        slides.forEach((s, i) => {
+          s.classList.toggle("active", i === current);
+        });
+        counter.innerText = `${(current + 1).toString().padStart(2, "0")} / ${slides.length.toString().padStart(2, "0")}`;
+      }
+
+      document.getElementById("next").onclick = () => {
+        current = (current + 1) % slides.length;
+        update();
+      };
+
+      document.getElementById("prev").onclick = () => {
+        current = (current - 1 + slides.length) % slides.length;
+        update();
+      };
+
+      document.addEventListener("keydown", (e) => {
+        if (e.key === "ArrowRight") document.getElementById("next").click();
+        if (e.key === "ArrowLeft") document.getElementById("prev").click();
+      });
+    </script>
+  </body>
+</html>
