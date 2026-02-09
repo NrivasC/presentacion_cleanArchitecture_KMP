@@ -1303,6 +1303,7 @@ class ProductUseCase {
       </div>
     </div>
 
+  
     <!-- SLIDE 4: DOMAIN - REPOSITORY INTERFACES -->
     <div class="slide">
       <div
@@ -1607,6 +1608,50 @@ class ProductDetailViewModel(
       </div>
     </div>
 
+      <!-- SLIDE: DOMAIN - ANALOGÍA -->
+<div class="slide">
+  <div class="max-w-5xl m-auto w-full">
+    <h2 class="text-4xl font-bold mb-8 text-center text-sky-400">
+      🟦 Domain – El conocimiento de cocina
+    </h2>
+
+    <p class="text-center text-slate-300 mb-10">
+      Domain es <b class="text-sky-400">lo que tu mamá SABE de cocina</b>,
+      sin importar dónde compra o quién cocina.
+    </p>
+
+    <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+      <div class="glass-card p-6">
+        <h4 class="text-sky-400 font-bold mb-2">Model (Entidad)</h4>
+        <p class="text-slate-300 text-sm">
+          🧠 <b>Ingredientes ideales</b><br/>
+          Arroz, pollo, cebolla.<br/>
+          No importa de dónde vienen.
+        </p>
+      </div>
+
+      <div class="glass-card p-6">
+        <h4 class="text-sky-400 font-bold mb-2">Repository (Interface)</h4>
+        <p class="text-slate-300 text-sm">
+          🧠 <b>Lista de pedidos</b><br/>
+          “Tráeme ingredientes”,<br/>
+          sin saber quién va a comprar.
+        </p>
+      </div>
+
+      <div class="glass-card p-6">
+        <h4 class="text-sky-400 font-bold mb-2">Use Case</h4>
+        <p class="text-slate-300 text-sm">
+          🧠 <b>La receta</b><br/>
+          Define pasos y reglas:<br/>
+          “si no hay arroz, no se cocina”.
+        </p>
+      </div>
+    </div>
+  </div>
+</div>
+
+
     <!-- SLIDE: PORTADA DATA -->
     <div class="slide">
       <div class="m-auto text-center">
@@ -1674,6 +1719,9 @@ class ProductDetailViewModel(
         </p>
       </div>
     </div>
+
+  
+
 
     <!-- SLIDE: DATA - REPOSITORY IMPLEMENTATION -->
     <div class="slide">
@@ -1903,6 +1951,59 @@ class ProductDetailViewModel(
       </div>
     </div>
 
+
+      <!-- SLIDE: DATA - ANALOGÍA -->
+<div class="slide">
+  <div class="max-w-5xl m-auto w-full">
+    <h2 class="text-4xl font-bold mb-8 text-center text-emerald-400">
+      🟩 Data – Ir al supermercado
+    </h2>
+
+    <p class="text-center text-slate-300 mb-10">
+      Data es <b class="text-emerald-400">el mundo real</b>:
+      desordenado, cambiante y lleno de formatos distintos.
+    </p>
+
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+      <div class="glass-card p-6">
+        <h4 class="text-emerald-400 font-bold mb-2">DataSource</h4>
+        <p class="text-slate-300 text-sm">
+          🧠 <b>Lugares donde compras</b><br/>
+          Supermercado, bodega, mercado.<br/>
+          Cada uno vende distinto.
+        </p>
+      </div>
+
+      <div class="glass-card p-6">
+        <h4 class="text-emerald-400 font-bold mb-2">DTO (Model)</h4>
+        <p class="text-slate-300 text-sm">
+          🧠 <b>Combos del supermercado</b><br/>
+          Traen cosas que no necesitas<br/>
+          y faltan cosas importantes.
+        </p>
+      </div>
+
+      <div class="glass-card p-6">
+        <h4 class="text-emerald-400 font-bold mb-2">Mapper</h4>
+        <p class="text-slate-300 text-sm">
+          🧠 <b>Quitar el empaque</b><br/>
+          Limpias, separas y dejas<br/>
+          solo el ingrediente útil.
+        </p>
+      </div>
+
+      <div class="glass-card p-6">
+        <h4 class="text-emerald-400 font-bold mb-2">Repository (Impl)</h4>
+        <p class="text-slate-300 text-sm">
+          🧠 <b>La persona que va a comprar</b><br/>
+          Decide dónde ir y cómo comprar,<br/>
+          pero sigue la lista del Domain.
+        </p>
+      </div>
+    </div>
+  </div>
+</div>
+
     <!-- SLIDE: DOMAIN vs DATA MODEL -->
     <div class="slide">
       <div class="max-w-5xl m-auto w-full">
@@ -1993,7 +2094,7 @@ class ProductDetailViewModel(
           </div>
         </div>
       </div>
-      
+
 
 <div class="slide">
     <div class="max-w-5xl m-auto w-full">
@@ -2043,6 +2144,9 @@ class ProductDetailViewModel(
 </div>
 
 
+
+
+
   
 <div class="slide">
 <div class="max-w-5xl w-full mx-auto flex flex-col items-center justify-center h-full">
@@ -2074,33 +2178,124 @@ class ProductDetailViewModel(
 </div>
 </div>
 
-<!-- Diapositiva 34: Organización de Módulos (CÓDIGO ANCHO) -->
-
+<!-- SLIDE NUEVO: POR QUÉ EXISTE DI -->
 <div class="slide">
-<div class="wide-code space-y-4 mx-auto flex flex-col items-center justify-center h-full">
-<div class="flex items-center justify-center gap-4 mb-4 text-center">
-<span class="p-3 rounded-2xl bg-amber-500/20 text-amber-400"><i class="fas fa-folder-tree"></i></span>
-<h2 class="text-3xl font-bold">Organización de Módulos</h2>
-</div>
-<div class="glass p-8 rounded-2xl border border-white/5 w-full">
-<pre class="code-font text-sm leading-relaxed text-amber-200">
-<span class="text-slate-500">// Separar los módulos por capas refuerza la arquitectura</span>
+  <div class="max-w-6xl m-auto w-full">
+    <h2 class="text-4xl font-bold mb-8 text-center text-amber-400">
+      🧩 ¿Por qué existe la Inyección de Dependencias?
+    </h2>
+
+    <p class="text-center text-lg text-slate-300 mb-10">
+      DI <b class="text-amber-400">NO es arquitectura</b>,  
+      <b class="text-amber-400">NO es lógica</b>  
+      <br />
+      👉 Es <b class="text-emerald-400">el pegamento</b> que conecta las capas
+      sin romper las reglas
+    </p>
+
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+      <!-- ANTI-PATRÓN -->
+      <div class="glass-card p-6 border-l-4 border-rose-500">
+        <h4 class="font-bold mb-4 text-rose-400 flex items-center gap-2">
+          <i class="fa-solid fa-triangle-exclamation"></i>
+          ❌ Sin Inyección de Dependencias
+        </h4>
+
+        <pre class="code-font text-sm text-rose-300"><code>// Presentation creando implementaciones
+class ProductViewModel {
+    private val api = ProductApi()
+    private val repo = ProductRepositoryImpl(api)
+    
+    fun loadProducts() {
+        // 🚨 ViewModel conoce Data
+        // 🚨 Difícil de testear
+        // 🚨 Cambio técnico rompe la UI
+    }
+}</code></pre>
+
+        <ul class="mt-4 text-xs text-slate-400 space-y-1">
+          <li>• Presentation decide implementaciones</li>
+          <li>• Alto acoplamiento</li>
+          <li>• Difícil de testear</li>
+        </ul>
+      </div>
+
+      <!-- SOLUCIÓN -->
+      <div class="glass-card p-6 border-l-4 border-emerald-500">
+        <h4 class="font-bold mb-4 text-emerald-400 flex items-center gap-2">
+          <i class="fa-solid fa-check-circle"></i>
+          ✅ Con Inyección de Dependencias
+        </h4>
+
+        <pre class="code-font text-sm text-emerald-300"><code>// Presentation depende SOLO de abstracciones
+class ProductViewModel(
+    private val repo: ProductRepository
+) {
+    fun loadProducts() {
+        // ✅ No sabe si viene de API o DB
+        // ✅ Fácil de testear
+    }
+}</code></pre>
+
+        <div class="mt-4 p-3 bg-emerald-500/10 border border-emerald-500/20 rounded">
+          <p class="text-xs text-emerald-300">
+            ❓ <b>Entonces… ¿quién crea ProductRepositoryImpl?</b>
+            <br />
+            👉 <b class="text-amber-400">La Inyección de Dependencias</b>
+          </p>
+        </div>
+      </div>
+    </div>
+
+    <!-- FRASE CLAVE -->
+    <div class="mt-10 p-6 bg-amber-500/10 border border-amber-500/20 rounded-lg">
+      <p class="text-center text-amber-300 text-lg font-bold">
+        🎯 Regla mental para DI:
+      </p>
+      <p class="text-center text-slate-300 mt-2">
+        <b class="text-emerald-400">
+          “DI es el ÚNICO lugar donde se crean las implementaciones concretas”
+        </b>
+      </p>
+    </div>
+
+    <!-- EJEMPLO KOIN -->
+    <div class="mt-8 glass-card p-6 border-l-4 border-amber-500">
+      <h4 class="font-bold mb-4 text-amber-400 flex items-center gap-2">
+        <i class="fa-solid fa-link"></i>
+        Ejemplo real con Koin
+      </h4>
+
+      <pre class="code-font text-sm text-amber-300"><code>// DI Module (el pegamento)
 val dataModule = module {
-single { ProductApiService(get()) }
-single&lt;ProductRepository&gt; { ProductRepositoryImp(get()) }
+    single<ProductRepository> {
+        ProductRepositoryImpl(get())
+    }
 }
 
 val domainModule = module {
-factory { GetProductsUseCase(get()) }
+    factory { GetProductsUseCase(get()) }
 }
 
-val viewModelModule = module {
-viewModel { ProductViewModel(get()) } <span class="text-slate-500">// Inyecta el Caso de Uso</span>
-}</pre>
+val presentationModule = module {
+    viewModel { ProductViewModel(get()) }
+}</code></pre>
+
+      <ul class="mt-4 text-xs text-slate-400 space-y-1">
+        <li>• Domain no sabe que existe Koin</li>
+        <li>• Data no sabe quién lo usa</li>
+        <li>• Presentation no crea nada</li>
+      </ul>
+    </div>
+
+    <p class="mt-6 text-center text-slate-500 italic">
+      DI no toma decisiones de negocio.  
+      Solo conecta piezas respetando Clean Architecture.
+    </p>
+  </div>
 </div>
 
-</div>
-</div>
+
 
 <!-- Diapositiva 35: Inicialización KMP -->
 
@@ -2145,6 +2340,40 @@ para SwiftUI</span>
 </div>
 
 
+<!-- SLIDE: DI - ANALOGÍA -->
+<div class="slide">
+  <div class="max-w-5xl m-auto w-full">
+    <h2 class="text-4xl font-bold mb-8 text-center text-rose-400">
+      🟥 DI – El organizador silencioso
+    </h2>
+
+    <p class="text-center text-slate-300 mb-10">
+      DI no cocina, no compra y no sirve.<br/>
+      <b class="text-rose-400">Solo decide quién hace cada cosa</b>.
+    </p>
+
+    <div class="glass-card p-6 mb-6">
+      <p class="text-slate-300 text-sm text-center">
+        🧠 <b>Analogía:</b><br/>
+        Es quien organiza el día:<br/>
+        “Tú compras, tú cocinas, tú sirves”.
+      </p>
+    </div>
+
+    <div class="p-6 bg-rose-500/10 border border-rose-500/20 rounded-lg">
+      <p class="text-center text-rose-300 font-bold">
+        Regla mental clave
+      </p>
+      <p class="text-center text-slate-300 mt-2">
+        👉 <b class="text-emerald-400">
+        DI es el único lugar donde se crean las cosas
+        </b>
+      </p>
+    </div>
+  </div>
+</div>
+
+
 
     
     <!-- SLIDE: PORTADA PRESENTATION -->
@@ -2174,6 +2403,7 @@ para SwiftUI</span>
         </div>
       </div>
     </div>
+
 
     <div class="slide">
       <div class="max-w-5xl m-auto w-full grid grid-cols-1 md:grid-cols-2 gap-10">
@@ -2281,6 +2511,41 @@ para SwiftUI</span>
         </div>
       </div>
     </div>
+
+
+        <!-- SLIDE: PRESENTATION - ANALOGÍA -->
+<div class="slide">
+  <div class="max-w-5xl m-auto w-full">
+    <h2 class="text-4xl font-bold mb-8 text-center text-amber-400">
+      🟨 Presentation – Pedir y servir la comida
+    </h2>
+
+    <p class="text-center text-slate-300 mb-10">
+      Presentation <b class="text-amber-400">no cocina ni compra</b>,
+      solo pide y muestra resultados.
+    </p>
+
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+      <div class="glass-card p-6">
+        <h4 class="text-amber-400 font-bold mb-2">ViewModel</h4>
+        <p class="text-slate-300 text-sm">
+          🧠 <b>La hija con hambre</b><br/>
+          Dice: “quiero comer”,<br/>
+          espera y maneja estados.
+        </p>
+      </div>
+
+      <div class="glass-card p-6">
+        <h4 class="text-amber-400 font-bold mb-2">UI</h4>
+        <p class="text-slate-300 text-sm">
+          🧠 <b>El plato servido</b><br/>
+          Solo muestra el resultado.<br/>
+          No sabe cómo se cocinó.
+        </p>
+      </div>
+    </div>
+  </div>
+</div>
 
     
 
