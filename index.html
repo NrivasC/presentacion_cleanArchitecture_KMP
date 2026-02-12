@@ -371,8 +371,11 @@ pre {
   <div>
       <h3 class="text-xs font-bold uppercase tracking-widest text-amber-500/60 mb-3">Conceptos Fundamentales</h3>
       <ul class="space-y-1 ml-4 border-l border-white/10 pl-4">
-        <li><button onclick="goToSlide(6)" class="text-slate-400 hover:text-amber-400 text-sm py-1 w-full text-left">Dependency Inversion</button></li>
-        <li><button onclick="goToSlide(7)" class="text-slate-400 hover:text-amber-400 text-sm py-1 w-full text-left">Regla de Dependencias</button></li>
+        <li><button onclick="goToSlide(5)" class="text-slate-400 hover:text-amber-400 text-sm py-1 w-full text-left">Dependency Inversion</button></li>
+        <li><button onclick="goToSlide(6)" class="text-slate-400 hover:text-amber-400 text-sm py-1 w-full text-left">Regla de Dependencias</button></li>
+        <li><button onclick="goToSlide(7)" class="text-slate-400 hover:text-amber-400 text-sm py-1 w-full text-left">¿Qué es Clean Architecture?</button></li>
+        <li><button onclick="goToSlide(8)" class="text-slate-400 hover:text-amber-400 text-sm py-1 w-full text-left">Estructura</button></li>
+        <li><button onclick="goToSlide(11)" class="text-slate-400 hover:text-amber-400 text-sm py-1 w-full text-left">Errores comunes</button></li>
       </ul>
     </div>
 
@@ -407,8 +410,10 @@ pre {
     <div>
       <h3 class="text-xs font-bold uppercase tracking-widest text-rose-500/60 mb-3">Presentation</h3>
       <ul class="space-y-1 ml-4 border-l border-white/10 pl-4">
-        <li><button onclick="goToSlide(27)" class="text-slate-400 hover:text-rose-400 text-sm py-1 w-full text-left">ViewModels</button></li>
-        <li><button onclick="goToSlide(30)" class="text-slate-400 hover:text-rose-400 text-sm py-1 w-full text-left">UI (Compose/SwiftUI)</button></li>
+        <li><button onclick="goToSlide(37)" class="text-slate-400 hover:text-rose-400 text-sm py-1 w-full text-left">ViewModels</button></li>
+        <li><button onclick="goToSlide(38)" class="text-slate-400 hover:text-rose-400 text-sm py-1 w-full text-left">UI (Screens)</button></li>
+        <li><button onclick="goToSlide(39)" class="text-slate-400 hover:text-rose-400 text-sm py-1 w-full text-left">UI Components</button></li>
+        <li><button onclick="goToSlide(40)" class="text-slate-400 hover:text-rose-400 text-sm py-1 w-full text-left">Mapper to UI</button></li>
       </ul>
     </div>
 
@@ -1100,6 +1105,56 @@ class ProductUseCase {
               responsabilidad
             </p>
           </div>
+
+          <!-- ERROR #5 -->
+<div class="glass-card p-6 border-l-4 border-rose-500">
+  <h4 class="text-rose-400 font-bold mb-4">
+    ❌ Error #5: DTO llegando a la UI
+  </h4>
+
+<pre class="code-font text-sm text-rose-300"><code>// MAL: UI usando DTO directamente
+@Composable
+fun ProductItem(product: ProductDto) {
+    Text(text = product.product_name)
+    Text(text = "$${product.price}")
+}</code></pre>
+
+  <ul class="mt-4 text-xs text-slate-400 space-y-1">
+    <li>• UI depende del formato del backend</li>
+    <li>• Cambios en API rompen la pantalla</li>
+    <li>• Mezcla capa Data con Presentation</li>
+  </ul>
+
+  <p class="mt-4 text-emerald-400 text-sm">
+    ✅ Solución: Mapea siempre a Model de Domain o UI Model antes de llegar a la UI
+  </p>
+</div>
+
+<!-- ERROR #6 -->
+<div class="glass-card p-6 border-l-4 border-rose-500">
+  <h4 class="text-rose-400 font-bold mb-4">
+    ❌ Error #6: ViewModel creando implementaciones
+  </h4>
+
+<pre class="code-font text-sm text-rose-300"><code>// MAL: Presentation decide implementación
+class ProductViewModel {
+
+    private val repo = ProductRepositoryImpl(ProductApi())
+
+}</code></pre>
+
+  <ul class="mt-4 text-xs text-slate-400 space-y-1">
+    <li>• Rompe Dependency Rule</li>
+    <li>• Alto acoplamiento</li>
+    <li>• Difícil de testear</li>
+  </ul>
+
+  <p class="mt-4 text-emerald-400 text-sm">
+    ✅ Solución: Inyectar dependencias desde DI (Koin/Hilt)
+  </p>
+</div>
+
+
         </div>
       </div>
     </div>
@@ -2511,6 +2566,95 @@ para SwiftUI</span>
         </div>
       </div>
     </div>
+
+    
+<!-- SLIDE: DOMAIN -> UI MAPPER -->
+<div class="slide">
+  <div class="max-w-6xl m-auto w-full">
+    <h2 class="text-4xl font-bold mb-8 text-center text-amber-400">
+      🔄 Mapper Domain → UI
+    </h2>
+
+    <p class="text-center text-slate-300 mb-10">
+      Cuando la UI necesita <b class="text-amber-400">formateos o cambios visuales</b>,
+      no modificamos el Domain ni ensuciamos el Composable.
+      <br/>
+      👉 Creamos un <b class="text-emerald-400">UI Model + Mapper</b>.
+    </p>
+
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+
+      <!-- PROBLEMA -->
+      <div class="glass-card p-6 border-l-4 border-rose-500">
+        <h4 class="text-rose-400 font-bold mb-4">
+          ❌ Lo que NO debemos hacer
+        </h4>
+
+<pre class="code-font text-sm text-rose-300"><code>@Composable
+fun ProductItem(product: Product) {
+    Text(
+        text = "$${product.price}"
+    )
+
+    Text(
+        text = if (product.stock > 0) 
+            "Disponible" 
+        else 
+            "Agotado"
+    )
+}</code></pre>
+
+        <ul class="mt-4 text-xs text-slate-400 space-y-1">
+          <li>• Lógica dentro del Composable</li>
+          <li>• Mezcla UI con reglas</li>
+          <li>• Difícil de testear</li>
+        </ul>
+      </div>
+
+      <!-- SOLUCIÓN -->
+      <div class="glass-card p-6 border-l-4 border-emerald-500">
+        <h4 class="text-emerald-400 font-bold mb-4">
+          ✅ Creamos un UI Model
+        </h4>
+
+<pre class="code-font text-sm text-emerald-300"><code>data class ProductUiModel(
+    val name: String,
+    val formattedPrice: String,
+    val availabilityText: String
+)</code></pre>
+
+<pre class="code-font text-sm text-emerald-300 mt-4"><code>fun Product.toUiModel(): ProductUiModel {
+    return ProductUiModel(
+        name = name,
+        formattedPrice = "$$price",
+        availabilityText =
+            if (stock > 0) "Disponible"
+            else "Agotado"
+    )
+}</code></pre>
+      </div>
+    </div>
+
+    <!-- RESPONSABILIDADES -->
+    <div class="mt-10 p-6 bg-amber-500/10 border border-amber-500/20 rounded-lg">
+      <p class="text-center text-amber-300 font-bold mb-2">
+        🎯 Regla clara
+      </p>
+      <p class="text-center text-slate-300">
+        Domain no sabe cómo se muestra.<br/>
+        UI no decide reglas de negocio.<br/>
+        <b class="text-emerald-400">
+          El mapper adapta el modelo para la pantalla.
+        </b>
+      </p>
+    </div>
+
+    <p class="mt-6 text-center text-slate-500 italic">
+      Si necesitas formatear, traducir o adaptar para la vista,
+      probablemente necesitas un UI Model.
+    </p>
+  </div>
+</div>
 
 
         <!-- SLIDE: PRESENTATION - ANALOGÍA -->
