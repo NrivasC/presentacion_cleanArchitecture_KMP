@@ -396,10 +396,10 @@ pre {
     <div>
       <h3 class="text-xs font-bold uppercase tracking-widest text-emerald-500/60 mb-3">Capa de Data</h3>
       <ul class="space-y-1 ml-4 border-l border-white/10 pl-4">
-        <li><button onclick="goToSlide(22)" class="text-slate-400 hover:text-emerald-400 text-sm py-1 w-full text-left">Repositories</button></li>
-        <li><button onclick="goToSlide(23)" class="text-slate-400 hover:text-emerald-400 text-sm py-1 w-full text-left">DataSources</button></li>
-        <li><button onclick="goToSlide(24)" class="text-slate-400 hover:text-emerald-400 text-sm py-1 w-full text-left">DTOs & Entities</button></li>
-        <li><button onclick="goToSlide(25)" class="text-slate-400 hover:text-emerald-400 text-sm py-1 w-full text-left">Mappers</button></li>
+        <li><button onclick="goToSlide(23)" class="text-slate-400 hover:text-emerald-400 text-sm py-1 w-full text-left">Repositories</button></li>
+        <li><button onclick="goToSlide(24)" class="text-slate-400 hover:text-emerald-400 text-sm py-1 w-full text-left">DataSources</button></li>
+        <li><button onclick="goToSlide(25)" class="text-slate-400 hover:text-emerald-400 text-sm py-1 w-full text-left">DTOs & Entities</button></li>
+        <li><button onclick="goToSlide(26)" class="text-slate-400 hover:text-emerald-400 text-sm py-1 w-full text-left">Mappers</button></li>
       </ul>
     </div>
 
@@ -421,9 +421,19 @@ pre {
     <div>
       <h3 class="text-xs font-bold uppercase tracking-widest text-amber-500/60 mb-3">Inyección de Dependencias</h3>
       <ul class="space-y-1 ml-4 border-l border-white/10 pl-4">
-        <li><button onclick="goToSlide(34)" class="text-slate-400 hover:text-amber-400 text-sm py-1 w-full text-left">Koin Modules</button></li>
+        <li><button onclick="goToSlide(31)" class="text-slate-400 hover:text-amber-400 text-sm py-1 w-full text-left">La DI explicada con ejemplos reales</button></li>
+        <li><button onclick="goToSlide(33)" class="text-slate-400 hover:text-amber-400 text-sm py-1 w-full text-left">¿Por qué existe la Inyección de Dependencias?</button></li>
       </ul>
     </div>
+
+<!-- Recursos -->
+  <div>
+      <h3 class="text-xs font-bold uppercase tracking-widest text-amber-500/60 mb-3">Recursos</h3>
+      <ul class="space-y-1 ml-4 border-l border-white/10 pl-4">
+        <li><button onclick="goToSlide(43)" class="text-slate-400 hover:text-amber-400 text-sm py-1 w-full text-left">Material de estudio</button></li>
+      </ul>
+    </div>
+
   </nav>
 </aside>
 
@@ -435,6 +445,13 @@ pre {
         >
           Clean Architecture en KMP
         </h1>
+
+        <div class="absolute bottom-3 right-4">
+          <span class="text-xs uppercase tracking-widest text-slate-400 block mb-1">Desarrollado por</span>
+          <span class="text-2xl font-black bg-gradient-to-l from-emerald-400 to-sky-400 bg-clip-text text-transparent italic">
+            Nelson Rivas
+          </span>
+        </div>
       </div>
     </div>
 
@@ -2766,7 +2783,7 @@ navController.navigate(Route.Detail(id = 5))</code></pre>
             <h4 class="font-bold mb-4 text-emerald-400">
               🏗️ Estructura KMP + Clean
             </h4>
-            <pre class="code-font text-xs text-emerald-300"><code>shared/
+            <pre class="code-font text-xs text-emerald-300"><code>
 ├── src/commonMain/kotlin/
 │   ├── domain/
 │   │   ├── model/Product.kt
@@ -2802,19 +2819,19 @@ navController.navigate(Route.Detail(id = 5))</code></pre>
 
         <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
           <div class="glass-card p-6">
-            <h4 class="font-bold mb-4 text-sky-400">📚 Material de Estudio</h4>
+            <h4 class="font-bold mb-4 text-sky-400">📚 Material de Estudio (Links)</h4>
             <ul class="space-y-3 text-sm text-slate-300">
               <li class="flex items-center gap-3">
                 <i class="fa-solid fa-book text-emerald-400"></i>
-                <span>Clean Architecture - Robert C. Martin</span>
+                <span><a href="https://blog.cleancoder.com/uncle-bob/2012/08/13/the-clean-architecture.html">Documentación Clean Architecture</a></span>
               </li>
               <li class="flex items-center gap-3">
                 <i class="fa-solid fa-video text-emerald-400"></i>
-                <span>Android Architecture Blueprints</span>
+                <span><a href="https://www.youtube.com/watch?v=8kGIlALKO-s" target="_blank"> Errores y explicacion de los casos de uso</a></span>
               </li>
               <li class="flex items-center gap-3">
                 <i class="fa-solid fa-code text-emerald-400"></i>
-                <span>KMP Official Documentation</span>
+                <span><a href="https://kotlinlang.org/docs/multiplatform/get-started.html" target="_blank">Documentación KMP</a></span>
               </li>
             </ul>
           </div>
@@ -2831,10 +2848,10 @@ navController.navigate(Route.Detail(id = 5))</code></pre>
                 Repo del Proyecto E-commerce
               </p>
               <p class="text-xs text-slate-500 mt-1">
-                github.com/tu-usuario/ecommerce-kmp-clean
+                https://github.com/NrivasC/E-commerce_cleanArchitecture
               </p>
               <p class="text-xs text-emerald-400 mt-2">
-                🌟 Clona, estudia, modifica
+                🌟 Clona, estudia, pregunta
               </p>
             </div>
           </div>
